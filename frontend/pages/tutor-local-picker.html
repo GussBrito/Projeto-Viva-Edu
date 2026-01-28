@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+   <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selecionar Local | Tutor</title>
+</head>
+<body>
+
+  <h1>Selecionar/Cadastrar Local (Mapa)</h1>
+  <p><a href="tutor-aulas.html">← Voltar sem selecionar</a></p>
+
+  <p>
+    <strong>Observação:</strong> aqui depois entra o Leaflet + busca (Nominatim) + salvar no PostGIS.
+    Por enquanto é um placeholder para estruturar o fluxo.
+  </p>
+
+  <hr>
+
+  <h2>Cadastrar local (simulação)</h2>
+
+  <form id="localForm">
+    <input type="text" id="nome" placeholder="Nome do local" required>
+    <input type="text" id="lat" placeholder="Latitude" required>
+    <input type="text" id="lng" placeholder="Longitude" required>
+
+    <button type="button" id="btnGeo">Usar minha localização</button>
+    <button type="submit">Salvar e Selecionar</button>
+  </form>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/tutor-local-picker.js"></script>
+</body>
+</html>

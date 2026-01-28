@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materiais | Tutor</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <h1>Materiais do Tutor</h1>
+
+  <a href="tutor-home.html">← Voltar</a>
+
+  <form id="materialForm">
+    <input
+      type="text"
+      id="titulo"
+      placeholder="Título do material"
+      required
+    >
+
+    <input
+      type="file"
+      id="arquivo"
+      required
+    >
+
+    <button type="submit">Enviar Material</button>
+  </form>
+
+  <hr>
+
+  <h2>Materiais Enviados</h2>
+  <div id="listaMateriais"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/tutor-materiais.js"></script>
+
+</body>
+</html>
