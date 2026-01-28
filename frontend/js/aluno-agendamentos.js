@@ -2,14 +2,13 @@
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
 
-if (!token) window.location.href = "login.html";
-if (role !== "ALUNO") window.location.href = "tutor-home.html";
+if (!token) window.location.replace("login.html");
+if (role !== "ALUNO") window.location.replace("tutor-home.html");
 // ===================================
 
 const lista = document.getElementById("listaAgendamentos");
 
 // MOCK TEMPORÁRIO (depois vem do backend)
-// Importante: aqui o local já vem “pronto” na resposta do agendamento/aula
 let agendamentos = [
   {
     id: 101,
@@ -53,6 +52,7 @@ function renderizar() {
       Status: ${ag.status}<br>
       Local: ${localNome}<br><br>
 
+      <button data-id="${ag.id}" class="btnChat">Chat</button>
       <button data-id="${ag.id}" class="btnMapa">Ver no mapa</button>
       <button data-id="${ag.id}" class="btnCancelar">Cancelar</button>
     `;
@@ -60,12 +60,14 @@ function renderizar() {
     lista.appendChild(div);
   });
 
-  // Ver no mapa
+  document.querySelectorAll(".btnChat").forEach(btn => {
+    btn.addEventListener("click", () => abrirChat(btn.dataset.id));
+  });
+
   document.querySelectorAll(".btnMapa").forEach(btn => {
     btn.addEventListener("click", () => abrirMapa(btn.dataset.id));
   });
 
-  // Cancelar
   document.querySelectorAll(".btnCancelar").forEach(btn => {
     btn.addEventListener("click", () => cancelarAgendamento(btn.dataset.id));
   });
@@ -76,16 +78,25 @@ function formatarData(dataISO) {
   return `${dia}/${mes}/${ano}`;
 }
 
+function abrirChat(agendamentoId) {
+  const ag = agendamentos.find(x => String(x.id) === String(agendamentoId));
+  if (!ag) return;
+
+  const tutor = encodeURIComponent(ag.aula.tutor);
+  const assunto = encodeURIComponent(`${ag.aula.disciplina} - ${ag.aula.assunto}`);
+
+  // thread = id do agendamento
+  window.location.href = `chat.html?thread=${encodeURIComponent(ag.id)}&tutor=${tutor}&assunto=${assunto}`;
+}
+
 function abrirMapa(agendamentoId) {
   const ag = agendamentos.find(x => String(x.id) === String(agendamentoId));
   if (!ag || !ag.aula?.local) {
     alert("Localização não disponível para este agendamento.");
     return;
   }
-
   const { latitude, longitude } = ag.aula.local;
-  const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
-  window.open(url, "_blank");
+  window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, "_blank");
 }
 
 function cancelarAgendamento(agendamentoId) {
@@ -96,9 +107,7 @@ function cancelarAgendamento(agendamentoId) {
   renderizar();
 
   alert("Agendamento cancelado!");
-
-  // FUTURO BACKEND:
-  // await apiFetch(`/agendamentos/${agendamentoId}`, { method: "DELETE" });
+  // FUTURO: await apiFetch(`/agendamentos/${agendamentoId}`, { method: "DELETE" });
 }
 
 renderizar();
