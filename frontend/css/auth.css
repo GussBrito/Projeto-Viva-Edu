@@ -1,0 +1,105 @@
+/* layout split */
+.auth-wrap{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns: 1fr 1.1fr;
+  background:#fff;
+}
+
+/* lado esquerdo: brand (laranja) */
+.auth-brand{
+  background: var(--brand);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 40px 22px;
+}
+.auth-brand .brand-box{
+  text-align:center;
+}
+.auth-brand img{
+  width: 500px;
+  height:auto;
+  margin-bottom: 14px;
+}
+.auth-brand .brand-title{
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: .5px;
+  line-height: 1;
+}
+.auth-brand .brand-sub{
+  margin-top: 6px;
+  font-size: 18px;
+  opacity:.95;
+}
+
+/* lado direito: form */
+.auth-form-side{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 46px 18px;
+  background:#fff;
+}
+
+/* garante que o conteúdo interno fique CENTRALIZADO */
+.auth-form-side > div{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+
+.auth-card{
+  width: min(520px, 96%);
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  border: 1px solid rgba(0,0,0,.04);
+}
+
+.auth-title{
+  text-align:center;
+  color: var(--brand);
+  font-size: 44px;
+  font-weight: 900;
+  margin-bottom: 18px;
+}
+
+.auth-field{
+  margin: 12px 0;
+}
+.auth-label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color: var(--brand);
+  font-weight: 800;
+  margin: 8px 0 8px 8px;
+}
+
+.auth-actions{
+  margin-top: 12px;
+  display:flex;
+  justify-content:center;
+}
+.auth-actions .btn{
+  width: 160px;
+}
+
+.auth-bottom{
+  text-align:center;
+  margin-top: 14px;
+  color: var(--muted);
+}
+
+/* responsivo */
+@media (max-width: 900px){
+  .auth-wrap{ grid-template-columns: 1fr; }
+  .auth-brand{ padding: 26px 18px; }
+  .auth-brand .brand-title{ font-size: 44px; }
+}

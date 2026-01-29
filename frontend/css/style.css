@@ -1,0 +1,40 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer{
+  margin-top: auto;
+  padding: 18px 10px;
+  text-align:center;
+  font-size: 14px;
+  color: #666;
+  border-top: 1px solid var(--border);
+  background: #f9f9f9;
+}
+.footer p{ margin: 6px 0; }
+
+/* ===============================
+   RESPONSIVO
+================================= */
+@media (max-width: 900px){
+  body:has(#loginForm), body:has(#cadastroForm){
+    background: var(--bg);
+  }
+
+  #loginForm, #cadastroForm,
+  #loginForm + p, #cadastroForm + p{
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  nav{
+    justify-content: center;
+  }
+}
