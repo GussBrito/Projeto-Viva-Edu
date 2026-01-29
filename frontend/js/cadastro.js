@@ -1,4 +1,4 @@
-document.getElementById("cadastroForm").addEventListener("submit", async (e) => {
+document.getElementById("cadastroForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
   const nome = document.getElementById("nome").value.trim();
@@ -9,14 +9,7 @@ document.getElementById("cadastroForm").addEventListener("submit", async (e) => 
   const confirmarSenha = document.getElementById("confirmarSenha").value;
   const tipo = document.getElementById("tipo").value;
 
-  // validações básicas
-  const cpfSomenteNumeros = cpf.replace(/\D/g, "");
-  if (cpfSomenteNumeros.length !== 11) {
-    alert("CPF inválido. Digite 11 números.");
-    return;
-  }
-
-  if (email.toLowerCase() !== confirmarEmail.toLowerCase()) {
+  if (email !== confirmarEmail) {
     alert("Os e-mails não conferem.");
     return;
   }
@@ -26,36 +19,23 @@ document.getElementById("cadastroForm").addEventListener("submit", async (e) => 
     return;
   }
 
-  if (senha.length < 6) {
-    alert("A senha deve ter pelo menos 6 caracteres.");
-    return;
+  // MOCK: salva dados localmente (simula backend)
+  localStorage.setItem("nome", nome);
+  localStorage.setItem("email", email);
+  localStorage.setItem("role", tipo);
+
+  alert("Cadastro realizado com sucesso!");
+  window.location.replace("login.html");
+
+  /*
+  FUTURO BACKEND:
+  POST /auth/register
+  {
+    nome,
+    cpf,
+    email,
+    senha,
+    role: tipo
   }
-
-  try {
-    // MODO TESTE (sem backend)
-    alert(
-      "Cadastro realizado!\n\n" +
-      `Nome: ${nome}\n` +
-      `CPF: ${cpfSomenteNumeros}\n` +
-      `Tipo: ${tipo}`
-    );
-
-    // Quando tiver backend:
-    /*
-    await apiFetch("/auth/register", {
-      method: "POST",
-      body: JSON.stringify({
-        nome,
-        cpf: cpfSomenteNumeros,
-        email,
-        senha,
-        role: tipo
-      })
-    });
-    */
-
-    window.location.href = "login.html";
-  } catch (err) {
-    alert("Erro no cadastro");
-  }
+  */
 });
