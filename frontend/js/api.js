@@ -1,25 +1,40 @@
-const API_URL = "http://localhost:3333"; // depois você ajusta
+const BASE_URL = "http://localhost:3000";
 
-async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem("token");
+/**
+ * Chamada padrão para API VivaEdu
+ * Uso: api("/auth/login", { method: "POST", body: {...}, auth: false })
+ */
+async function api(path, { method = "GET", body, auth = true, isForm = false } = {}) {
+  const headers = {};
 
-  const headers = options.headers || {};
-  headers["Content-Type"] = "application/json";
+  if (!isForm) headers["Content-Type"] = "application/json";
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+  if (auth) {
+    const token = localStorage.getItem("token");
+    if (token) headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(API_URL + endpoint, {
-    ...options,
-    headers
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers,
+    body: isForm ? body : (body ? JSON.stringify(body) : undefined)
   });
 
-  if (response.status === 401) {
-    localStorage.clear();
-    window.location.href = "../pages/login.html";
-    return;
+  // token expirou/invalidou
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("nome");
+    window.location.replace("login.html");
+    return null;
   }
 
-  return response.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || data?.message || "Erro na API");
+  return data;
 }
+
+// deixa disponível globalmente para outros scripts (auth.js, etc.)
+window.api = api;
+window.BASE_URL = BASE_URL;

@@ -3,28 +3,42 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
   const email = document.getElementById("email").value.trim();
   const senha = document.getElementById("senha").value;
-  const tipo = document.getElementById("tipo").value; // ALUNO | TUTOR | COORDENADOR | ...
+
+  if (!email || !senha) {
+    alert("Informe email e senha.");
+    return;
+  }
 
   try {
-    const result = await login(email, senha, tipo);
+    const res = await fetch("http://localhost:3000/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, senha })
+    });
 
-    // salva nome (mock)
-    if (result?.nome) localStorage.setItem("nome", result.nome);
+    const data = await res.json();
 
-    if (result.role === "ALUNO") {
-      window.location.replace("aluno-home.html");
-    } else if (result.role === "TUTOR") {
-      window.location.replace("tutor-home.html");
-    } else if (result.role === "COORDENADOR") {
-      window.location.replace("coordenador-home.html");
-    } else if (result.role === "ESCOLA") {
-      window.location.replace("escola-home.html"); // se você criar depois
-    } else if (result.role === "ADMIN") {
-      window.location.replace("admin-home.html"); // se você criar depois
-    } else {
-      alert("Tipo de usuário não foi reconhecido: " + result.role);
+    if (!res.ok) {
+      alert(data.error || "Login inválido.");
+      return;
     }
+
+    const role = (data.user?.role || "").toUpperCase().trim();
+    const nome = data.user?.nome || "";
+    const userId = data.user?.id || "";
+
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("nome", nome);
+    localStorage.setItem("role", role);
+    localStorage.setItem("userId", userId);
+
+    if (role === "ALUNO") return window.location.replace("aluno-home.html");
+    if (role === "TUTOR" || role === "PROFESSOR") return window.location.replace("tutor-home.html");
+
+    alert("Perfil inválido: " + role);
+    window.location.replace("login.html");
   } catch (err) {
-    alert(err.message || "Erro no login");
+    console.error(err);
+    alert("Erro ao conectar com o servidor.");
   }
 });

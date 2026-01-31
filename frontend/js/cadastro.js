@@ -1,4 +1,4 @@
-document.getElementById("cadastroForm").addEventListener("submit", (e) => {
+document.getElementById("cadastroForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const nome = document.getElementById("nome").value.trim();
@@ -7,8 +7,14 @@ document.getElementById("cadastroForm").addEventListener("submit", (e) => {
   const confirmarEmail = document.getElementById("confirmarEmail").value.trim();
   const senha = document.getElementById("senha").value;
   const confirmarSenha = document.getElementById("confirmarSenha").value;
-  const tipo = document.getElementById("tipo").value; // mock: ALUNO/TUTOR/COORDENADOR
+  const tipo = document.getElementById("tipo").value; // ALUNO/TUTOR (ou outros no futuro)
 
+  if (!nome || !cpf || !email || !senha) {
+    alert("Preencha todos os campos obrigatórios.");
+    return;
+  }
+
+  // comparação de email case-insensitive (mais amigável)
   if (email.toLowerCase() !== confirmarEmail.toLowerCase()) {
     alert("Os e-mails não conferem.");
     return;
@@ -19,34 +25,34 @@ document.getElementById("cadastroForm").addEventListener("submit", (e) => {
     return;
   }
 
-  // ===== salva usuário no "banco" mock =====
-  let users = [];
-  try { users = JSON.parse(localStorage.getItem("users") || "[]"); } catch { users = []; }
-
-  // evita duplicar email
-  if (users.some(u => (u.email || "").toLowerCase() === email.toLowerCase())) {
-    alert("Já existe um usuário com esse e-mail (mock).");
-    return;
-  }
-
-  const user = {
-    id: Date.now(),
+  const payload = {
     nome,
+    cpf,
     email,
-    role: tipo,
-    bio: "",
-    telefone: "",
-    fotoDataUrl: ""
+    senha,
+    role: (tipo || "").toUpperCase().trim()
   };
 
-  users.push(user);
-  localStorage.setItem("users", JSON.stringify(users));
+  try {
+    const res = await fetch("http://localhost:3000/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
 
-  // deixa o cadastro “visível” pro perfil e pro login mock
-  localStorage.setItem("nome", nome);
-  localStorage.setItem("email", email);
-  localStorage.setItem("role", tipo);
+    const data = await res.json();
 
-  alert("Cadastro realizado com sucesso!");
-  window.location.replace("login.html");
+    if (!res.ok) {
+      alert(data.error || "Erro ao cadastrar.");
+      return;
+    }
+
+    alert("Cadastro realizado com sucesso!");
+    window.location.replace("login.html");
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao conectar com o servidor.");
+  }
 });
