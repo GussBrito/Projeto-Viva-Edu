@@ -7,14 +7,15 @@ document.getElementById("cadastroForm").addEventListener("submit", async (e) => 
   const confirmarEmail = document.getElementById("confirmarEmail").value.trim();
   const senha = document.getElementById("senha").value;
   const confirmarSenha = document.getElementById("confirmarSenha").value;
-  const tipo = document.getElementById("tipo").value;
+  const tipo = document.getElementById("tipo").value; // ALUNO/TUTOR (ou outros no futuro)
 
   if (!nome || !cpf || !email || !senha) {
     alert("Preencha todos os campos obrigatórios.");
     return;
   }
 
-  if (email !== confirmarEmail) {
+  // comparação de email case-insensitive (mais amigável)
+  if (email.toLowerCase() !== confirmarEmail.toLowerCase()) {
     alert("Os e-mails não conferem.");
     return;
   }
@@ -29,7 +30,7 @@ document.getElementById("cadastroForm").addEventListener("submit", async (e) => 
     cpf,
     email,
     senha,
-    role: tipo.toUpperCase()
+    role: (tipo || "").toUpperCase().trim()
   };
 
   try {
@@ -50,7 +51,6 @@ document.getElementById("cadastroForm").addEventListener("submit", async (e) => 
 
     alert("Cadastro realizado com sucesso!");
     window.location.replace("login.html");
-
   } catch (err) {
     console.error(err);
     alert("Erro ao conectar com o servidor.");

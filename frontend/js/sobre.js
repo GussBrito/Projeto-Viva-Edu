@@ -1,15 +1,13 @@
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
 
-if (!token) window.location.replace("login.html");
-
-const linkAluno = document.getElementById("linkHomeAluno");
-const linkTutor = document.getElementById("linkHomeTutor");
-
-if (role === "ALUNO") {
-  linkTutor.style.display = "none";
-} else if (role === "TUTOR") {
-  linkAluno.style.display = "none";
+if (!token) {
+  window.location.replace("login.html");
 }
 
-document.getElementById("logoutBtn").addEventListener("click", () => logout());
+document.getElementById("btnVoltar").addEventListener("click", () => {
+  if (role === "ALUNO") window.location.replace("aluno-home.html");
+  else if (role === "TUTOR") window.location.replace("tutor-home.html");
+  else if (role === "COORDENADOR") window.location.replace("coordenador-home.html");
+  else window.location.replace("login.html");
+});

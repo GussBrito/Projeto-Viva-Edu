@@ -1,58 +1,72 @@
-/* layout split */
+/* =========================
+   LAYOUT SPLIT (LOGIN / CADASTRO)
+========================= */
+
 .auth-wrap{
-  min-height:100vh;
-  display:grid;
+  min-height: 100vh;
+  display: grid;
   grid-template-columns: 1fr 1.1fr;
-  background:#fff;
+  background: #fff;
 }
 
-/* lado esquerdo: brand (laranja) */
+/* =========================
+   LADO ESQUERDO – BRAND
+========================= */
+
 .auth-brand{
   background: var(--brand);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 40px 22px;
 }
+
 .auth-brand .brand-box{
-  text-align:center;
+  text-align: center;
 }
+
+/* LOGO RESPONSIVA */
 .auth-brand img{
-  width: 500px;
-  height:auto;
+  width: min(360px, 78vw);
+  height: auto;
   margin-bottom: 14px;
 }
+
 .auth-brand .brand-title{
   font-size: 56px;
   font-weight: 900;
   letter-spacing: .5px;
   line-height: 1;
 }
+
 .auth-brand .brand-sub{
   margin-top: 6px;
   font-size: 18px;
-  opacity:.95;
+  opacity: .95;
 }
 
-/* lado direito: form */
+/* =========================
+   LADO DIREITO – FORMULÁRIO
+========================= */
+
 .auth-form-side{
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 46px 18px;
-  background:#fff;
+  background: #fff;
 }
 
-/* garante que o conteúdo interno fique CENTRALIZADO */
+/* container interno centralizado */
 .auth-form-side > div{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-
+/* CARD */
 .auth-card{
   width: min(520px, 96%);
   background: #fff;
@@ -63,43 +77,102 @@
 }
 
 .auth-title{
-  text-align:center;
+  text-align: center;
   color: var(--brand);
   font-size: 44px;
   font-weight: 900;
   margin-bottom: 18px;
 }
 
+/* CAMPOS */
 .auth-field{
   margin: 12px 0;
 }
+
 .auth-label{
-  display:flex;
-  align-items:center;
-  gap:10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--brand);
   font-weight: 800;
   margin: 8px 0 8px 8px;
 }
 
+/* AÇÕES */
 .auth-actions{
-  margin-top: 12px;
-  display:flex;
-  justify-content:center;
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
 }
+
 .auth-actions .btn{
   width: 160px;
 }
 
+/* TEXTO INFERIOR */
 .auth-bottom{
-  text-align:center;
-  margin-top: 14px;
+  text-align: center;
+  margin-top: 16px;
   color: var(--muted);
 }
 
-/* responsivo */
+.auth-bottom a{
+  color: var(--brand);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-bottom a:hover{
+  text-decoration: underline;
+}
+
+/* =========================
+   FOOTER
+   (desktop apenas)
+========================= */
+
+.footer{
+  position: static;
+  margin-top: auto;
+}
+
+/* =========================
+   RESPONSIVO (MOBILE)
+========================= */
+
 @media (max-width: 900px){
-  .auth-wrap{ grid-template-columns: 1fr; }
-  .auth-brand{ padding: 26px 18px; }
-  .auth-brand .brand-title{ font-size: 44px; }
+
+  /* vira coluna */
+  .auth-wrap{
+    grid-template-columns: 1fr;
+  }
+
+  /* topo mais compacto */
+  .auth-brand{
+    padding: 18px 16px;
+  }
+
+  /* logo menor no mobile */
+  .auth-brand img{
+    width: min(260px, 70vw);
+    margin-bottom: 0;
+  }
+
+  .auth-form-side{
+    padding: 20px 14px 26px;
+    align-items: flex-start;
+  }
+
+  .auth-card{
+    padding: 22px;
+  }
+
+  .auth-title{
+    font-size: 34px;
+  }
+
+  /* ✅ OPÇÃO A: ESCONDE O FOOTER NO MOBILE */
+  .footer{
+    display: none;
+  }
 }

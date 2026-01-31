@@ -12,9 +12,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   try {
     const res = await fetch("http://localhost:3000/auth/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha })
     });
 
@@ -25,33 +23,20 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       return;
     }
 
-    // Normaliza o role para evitar problemas de maiúsculas/minúsculas/espaços
-    const role = (data.role || "").toUpperCase().trim();
+    const role = (data.user?.role || "").toUpperCase().trim();
+    const nome = data.user?.nome || "";
+    const userId = data.user?.id || "";
 
-    // Salva sessão
     localStorage.setItem("token", data.token);
-    localStorage.setItem("nome", data.nome || "");
+    localStorage.setItem("nome", nome);
     localStorage.setItem("role", role);
+    localStorage.setItem("userId", userId);
 
-    // Debug útil (se quiser remover depois)
-    console.log("Login OK:", { nome: data.nome, role });
+    if (role === "ALUNO") return window.location.replace("aluno-home.html");
+    if (role === "TUTOR" || role === "PROFESSOR") return window.location.replace("tutor-home.html");
 
-    // Redireciona por papel
-    if (role === "ALUNO") {
-      window.location.href = "aluno-home.html";
-      return;
-    }
-
-    // Aceita TUTOR e, se existir usuário antigo, PROFESSOR
-    if (role === "TUTOR" || role === "PROFESSOR") {
-      window.location.href = "tutor-home.html";
-      return;
-    }
-
-    // Se vier algo inesperado, não deixa passar silencioso
-    alert("Perfil inválido retornado pelo servidor: " + role);
-    window.location.href = "login.html";
-
+    alert("Perfil inválido: " + role);
+    window.location.replace("login.html");
   } catch (err) {
     console.error(err);
     alert("Erro ao conectar com o servidor.");

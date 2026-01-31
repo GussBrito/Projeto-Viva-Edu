@@ -1,10 +1,10 @@
-// ===== PROTEÇÃO (TOKEN + ROLE) =====
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
 
-if (!token) window.location.href = "login.html";
-if (role !== "TUTOR") window.location.href = "aluno-home.html";
-// ==================================
+if (!token) window.location.replace("login.html");
+if (role !== "TUTOR") window.location.replace("aluno-home.html");
+
+document.getElementById("logoutBtn").addEventListener("click", () => logout());
 
 const form = document.getElementById("localForm");
 const btnGeo = document.getElementById("btnGeo");
@@ -14,10 +14,7 @@ const inputLat = document.getElementById("lat");
 const inputLng = document.getElementById("lng");
 
 btnGeo.addEventListener("click", () => {
-  if (!navigator.geolocation) {
-    alert("Geolocalização não suportada.");
-    return;
-  }
+  if (!navigator.geolocation) return alert("Geolocalização não suportada.");
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
@@ -41,12 +38,7 @@ form.addEventListener("submit", (e) => {
     return;
   }
 
-  // Local selecionado (no futuro, isso virá do POST /locais retornando id + geom)
-  const localSelecionado = { nome, latitude, longitude };
-
-  localStorage.setItem("selected_local", JSON.stringify(localSelecionado));
-
-  // volta pra página que pediu o local
+  localStorage.setItem("selected_local", JSON.stringify({ nome, latitude, longitude }));
   const voltarPara = localStorage.getItem("pick_local_return_to") || "tutor-aulas.html";
   window.location.href = voltarPara;
 });

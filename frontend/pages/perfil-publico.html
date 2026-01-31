@@ -6,10 +6,12 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Materiais | Tutor</title>
+
+  <title>Perfil Público | VivaEdu</title>
 
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/perfil-publico.css">
 </head>
 <body>
 
@@ -18,35 +20,43 @@
     <div class="brand-left">
       <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
       <div>
-        
-        <div class="brand-name">Materiais do Tutor</div>
+        <div class="brand-name">VivaEdu</div>
+        <div class="brand-sub">Perfil Público</div>
       </div>
     </div>
 
     <nav class="app-nav">
-      <a href="tutor-home.html">Home</a>
-      <a href="tutor-aulas.html">Aulas</a>
-      <a href="tutor-chats.html">Chats</a>
-      <a href="perfil.html">Perfil</a>
-      <button id="logoutBtn" class="btn btn-outline" type="button">Sair</button>
+      <button id="btnVoltar" class="btn btn-outline" type="button">Voltar</button>
     </nav>
   </div>
 </header>
 
 <main class="container page">
-  <div class="page-title">Materiais</div>
+  <div class="page-title">Perfil</div>
 
-  <div class="list-card">
-    <h3 style="margin:0 0 10px;color:var(--brand);">Enviar Material</h3>
+  <div class="perfil-publico-card">
+    <div class="perfil-publico-top">
+      <img id="fotoPreview" class="avatar" alt="Foto">
+      <div>
+        <h2 id="nome" class="nome">—</h2>
+        <p class="role" id="role">—</p>
+      </div>
+    </div>
 
-    <form id="materialForm">
-      <input type="text" id="titulo" placeholder="Título do material" required>
-      <input type="file" id="arquivo" required>
-      <button class="btn btn-primary" type="submit">Enviar Material</button>
-    </form>
+    <div class="perfil-publico-body">
+      <h3>Bio</h3>
+      <p id="bio" class="bio">—</p>
+
+      <div id="telefoneBox" style="display:none;">
+        <h3>Telefone</h3>
+        <p id="telefone" class="bio"></p>
+      </div>
+
+      <div class="hint">
+        * Este é um perfil público (somente leitura).
+      </div>
+    </div>
   </div>
-
-  <div id="listaMateriais"></div>
 </main>
 
 <footer class="footer">
@@ -55,8 +65,6 @@
   <p>Desenvolvido por <strong>Luiz Gustavo Brito</strong>, <strong>Vanessa Beatriz</strong> e <strong>Samuel Marcos Souza</strong></p>
 </footer>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/tutor-materiais.js"></script>
+<script src="../js/perfil-publico.js"></script>
 </body>
 </html>
