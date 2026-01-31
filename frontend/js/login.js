@@ -32,12 +32,26 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     localStorage.setItem("role", role);
     localStorage.setItem("userId", userId);
 
-    if (role === "ALUNO") return window.location.replace("aluno-home.html");
-    if (role === "TUTOR" || role === "PROFESSOR") return window.location.replace("tutor-home.html");
+    if (role === "ALUNO") {
+      return window.location.replace("aluno-home.html");
+    }
+
+    if (role === "TUTOR" || role === "PROFESSOR") {
+      return window.location.replace("tutor-home.html");
+    }
+
+    if (role === "COORDENADOR") {
+      return window.location.replace("coordenador-home.html");
+    }
 
     alert("Perfil inválido: " + role);
     window.location.replace("login.html");
-  } catch (err) {
+
+
+    alert("Perfil inválido: " + role);
+    window.location.replace("login.html");
+  }
+  catch (err) {
     console.error(err);
     alert("Erro ao conectar com o servidor.");
   }

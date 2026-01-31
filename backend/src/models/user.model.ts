@@ -1,24 +1,23 @@
-export type UserRole = 'ALUNO' | 'TUTOR';
+export type UserRole = 'ALUNO' | 'TUTOR' | 'COORDENADOR';
 
 export interface User {
   _id?: string;
-
   nome: string;
-  cpf: string;
   email: string;
   senha: string;
+  ativo?: boolean;
   role: UserRole;
 
-  // comuns
-  telefone?: string;
-
-  // aluno
+  // campos aluno (opcionais)
   idade?: number;
   serie?: string;
 
-  // tutor
+  // campos tutor (opcionais)
   areaAtuacao?: string;
   formacao?: string;
+
+  // campos coordenador (opcional por enquanto)
+  // ex: unidade?: string;
 
   createdAt: Date;
 }
