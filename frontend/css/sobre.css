@@ -1,0 +1,120 @@
+
+
+/* fundo no "padrão do site" */
+html, body{
+  background: #f2f2f2; 
+}
+
+
+body > header.sobre-header,
+body > main.sobre-container,
+body > footer.footer{
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* ===== HEADER ===== */
+.sobre-header{
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.header-content{
+  width: min(1100px, 92%);
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* como só tem botão, centraliza */
+}
+
+/* Botão */
+.btn-voltar{
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1.5px solid var(--brand);
+  background: transparent;
+  color: var(--brand);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.btn-voltar:hover{
+  background: var(--brand);
+  color: #fff;
+}
+
+/* ===== CONTEÚDO ===== */
+.sobre-container{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 38px 0 40px;
+}
+
+/* a box central */
+.sobre-card{
+  width: min(760px, 92%);
+  background: #fff;
+  padding: 40px;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+.sobre-logo{
+  display: block;
+  margin: 0 auto 16px;
+  height: 80px;
+  width: auto;
+}
+
+.sobre-card h1{
+  text-align: center;
+  color: var(--brand);
+  margin: 0 0 26px;
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.sobre-card section{
+  margin-bottom: 22px;
+}
+
+.sobre-card h2{
+  color: var(--brand);
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.sobre-card p{
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.sobre-card ul{
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.sobre-card li{
+  margin-bottom: 6px;
+}
+
+.aviso{
+  background: #f9f9f9;
+  padding: 14px;
+  border-radius: 8px;
+  border-left: 4px solid var(--brand);
+}
+
+
+@media (max-width: 520px){
+  .sobre-card{
+    padding: 26px;
+  }
+}

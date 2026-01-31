@@ -7,33 +7,66 @@
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | VivaEdu</title>
-  <link rel="stylesheet" href="../css/style.css">
+
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/auth.css">
 </head>
 <body>
 
-<h1>VivaEdu</h1>
+  <main class="auth-wrap">
+    <section class="auth-brand">
+      <div class="brand-box">
+        <img src="../src/icons/logo-vivaedu-branca.png" alt="VivaEdu">
+      
+      </div>
+    </section>
 
-<form id="loginForm">
-  <input type="email" id="email" placeholder="E-mail" required>
-  <input type="password" id="senha" placeholder="Senha" required>
+    <section class="auth-form-side">
+      <div style="width:100%;">
+        <div class="auth-card">
+          <div class="auth-title">Bem-vindo ao<br>VivaEdu</div>
 
-  <select id="tipo" required>
-    <option value="ALUNO">Aluno</option>
-    <option value="TUTOR">Tutor</option>
-  </select>
+          <form id="loginForm">
+            <div class="auth-field">
+              <div class="auth-label">Usuário</div>
+              <input type="email" id="email" placeholder="E-mail" required>
+            </div>
 
-  <button type="submit">Entrar</button>
-</form>
+            <div class="auth-field">
+              <div class="auth-label">Senha</div>
+              <input type="password" id="senha" placeholder="Senha" required>
+            </div>
 
-<p>
-  Ainda não tem conta?
-  <a href="cadastro.html">Cadastre-se</a>
-</p>
+            <!-- temporário pro mock -->
+            <div class="auth-field">
+              <select id="tipo" required>
+                <option value="ALUNO">Aluno</option>
+                <option value="TUTOR">Tutor</option>
+                <option value="COORDENADOR">Coordenador</option>
+              </select>
+            </div>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/login.js"></script>
+            <div class="auth-actions">
+              <button class="btn btn-primary" type="submit">Entrar</button>
+            </div>
+          </form>
+        </div>
 
+        <div class="auth-bottom">
+          Ainda não tem uma conta? <a href="cadastro.html">Cadastre-se</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 – VivaEdu</p>
+    <p>Projeto acadêmico desenvolvido para fins educacionais. Não possui finalidade comercial.</p>
+    <p>Desenvolvido por <strong>Luiz Gustavo Brito</strong>, <strong>Vanessa Beatriz</strong> e <strong>Samuel Marcos Souza</strong></p>
+  </footer>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/login.js"></script>
 </body>
 </html>
-

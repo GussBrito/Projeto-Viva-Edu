@@ -2,67 +2,91 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Meu Perfil | VivaEdu</title>
-  <link rel="stylesheet" href="../css/style.css">
+
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="../css/perfil.css">
 </head>
 <body>
 
-  <h1>Meu Perfil</h1>
-
-  <nav>
-    <a href="aluno-home.html" id="linkHomeAluno">Home Aluno</a>
-    <a href="tutor-home.html" id="linkHomeTutor">Home Tutor</a>
-    <span id="atalhoTutor" style="display:none;">
-      | <a href="tutor-aulas.html">Minhas Aulas</a>
-    </span>
-    |
-    <button id="logoutBtn" type="button">Sair</button>
-  </nav>
-
-  <hr>
-
-  <form id="perfilForm">
-
-    <h3>Foto de Perfil</h3>
-    <img
-      id="fotoPreview"
-      alt="Foto"
-      style="width:120px;height:120px;border:1px solid #ccc;border-radius:60px;object-fit:cover;display:block;margin-bottom:10px;"
-    >
-    <input type="file" id="foto" accept="image/*">
-
-    <hr>
-
-    <input type="text" id="nome" placeholder="Nome completo" required>
-
-    <input type="email" id="email" placeholder="E-mail" required readonly>
-
-    <!-- BIO: visível para ALUNO e TUTOR -->
-    <textarea
-      id="bio"
-      placeholder="Descrição / Sobre você (opcional)"
-      rows="4"
-    ></textarea>
-
-    <!-- CAMPOS EXCLUSIVOS DO TUTOR -->
-    <div id="camposTutor" style="display:none;">
-      <input type="text" id="telefone" placeholder="Telefone (opcional)">
+<header class="app-header">
+  <div class="container app-bar">
+    <div class="brand-left">
+      <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
+      <div>
+       
+        <div class="brand-name">Meu Perfil</div>
+      </div>
     </div>
 
-    <p><strong>Tipo de conta:</strong> <span id="roleText"></span></p>
+    <nav class="app-nav">
+      <button id="btnVoltar" class="btn btn-outline" type="button">Voltar</button>
+      <button id="logoutBtn" class="btn btn-outline" type="button">Sair</button>
+    </nav>
+  </div>
+</header>
 
-    <button type="submit">Salvar Alterações</button>
-  </form>
+<main class="container page">
+  <div class="page-title">Meu Perfil</div>
 
-  <script src="../js/api.js"></script>
-  <script src="../js/auth.js"></script>
-  <script src="../js/perfil.js"></script>
+  <div class="perfil-card">
+    <div class="perfil-top">
+      <div class="avatar-wrap">
+        <img id="fotoPreview" class="avatar" alt="Foto de perfil">
+        <label class="avatar-btn">
+          Trocar foto
+          <input type="file" id="foto" accept="image/*">
+        </label>
+        <div class="perfil-role">
+          <span>Tipo:</span>
+          <strong id="roleText">—</strong>
+        </div>
+      </div>
 
+      <div class="perfil-fields">
+        <div class="field">
+          <label>Nome</label>
+          <input type="text" id="nome" placeholder="Seu nome completo" required>
+        </div>
+
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" id="email" placeholder="Seu e-mail" readonly>
+          <small>O e-mail é definido no cadastro (no mock, vem do localStorage).</small>
+        </div>
+
+        <div class="field">
+          <label>Bio</label>
+          <textarea id="bio" rows="4" placeholder="Escreva uma breve descrição sobre você (opcional)"></textarea>
+        </div>
+
+        <!-- Só Tutor -->
+        <div id="camposTutor" class="field" style="display:none;">
+          <label>Telefone (Tutor)</label>
+          <input type="text" id="telefone" placeholder="(opcional) Ex.: (83) 9xxxx-xxxx">
+        </div>
+
+        <div class="perfil-actions">
+          <button id="btnSalvar" class="btn btn-primary" type="button">Salvar alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>© 2026 – VivaEdu</p>
+  <p>Projeto acadêmico desenvolvido para fins educacionais. Não possui finalidade comercial.</p>
+  <p>Desenvolvido por <strong>Luiz Gustavo Brito</strong>, <strong>Vanessa Beatriz</strong> e <strong>Samuel Marcos Souza</strong></p>
+</footer>
+
+<script src="../js/auth.js"></script>
+<script src="../js/perfil.js"></script>
 </body>
 </html>

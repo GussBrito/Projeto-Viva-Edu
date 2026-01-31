@@ -1,0 +1,114 @@
+/* Header padrão */
+.app-header{
+  background:#fff;
+  border-bottom: 1px solid var(--border);
+}
+.app-bar{
+  height: 78px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.brand-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.brand-left img{
+  width: 100px;
+  height:auto;
+}
+.brand-left .brand-name{
+  font-weight: 900;
+  color: var(--brand);
+  font-size: 22px;
+  line-height:1;
+}
+.brand-left .brand-sub{
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.app-nav{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  font-weight: 800;
+}
+.app-nav a{ color: var(--brand); }
+.app-nav a:hover{ color: var(--brand2); }
+
+.page{
+  padding: 26px 0 40px;
+}
+
+.page-title{
+  color: var(--brand);
+  font-weight: 900;
+  font-size: 40px;
+  text-align:center;
+  margin: 10px 0 24px;
+}
+
+/* grid de cards da home (igual print do aluno) */
+.cards{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.card-tile{
+  background:#fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 26px;
+  text-align:center;
+  border: 1px solid rgba(0,0,0,.04);
+  transition: transform .12s ease;
+}
+.card-tile:hover{ transform: translateY(-2px); }
+.card-tile img{ width: 78px; height:auto; }
+.card-tile h3{
+  margin-top: 14px;
+  color: var(--brand);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+/* listas (aulas, agendamentos, chats) */
+.list-card{
+  background:#fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadowSoft);
+  border: 1px solid rgba(0,0,0,.04);
+  padding: 14px;
+  margin: 14px 0;
+}
+.list-card button{ margin-right: 8px; margin-top: 10px; }
+
+@media (max-width: 900px){
+  .cards{ grid-template-columns: 1fr; }
+  .page-title{ font-size: 32px; }
+}
+
+/* ===== FIX: centralizar última linha de cards (coordenador) ===== */
+/* coloca no FINAL do app.css para sobrescrever qualquer grid anterior */
+
+.cards{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 22px !important;
+}
+
+/* largura fixa para os cards ficarem alinhados e centralizar bonito */
+.card-tile{
+  flex: 0 0 320px !important;
+}
+
+/* responsivo */
+@media (max-width: 720px){
+  .card-tile{
+    flex: 1 1 100% !important;
+  }
+}

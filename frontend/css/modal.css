@@ -1,0 +1,54 @@
+/* Modal genérico (usar onde precisar) */
+.modal-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 9999;
+}
+
+.modal-backdrop.open{
+  display: flex;
+}
+
+.modal{
+  width: min(680px, 98%);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 16px 38px rgba(0,0,0,.20);
+  padding: 16px;
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+.modal-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.modal-header h3{
+  margin: 0;
+  color: var(--brand);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.modal-actions{
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* Texto de ajuda */
+.hint{
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
