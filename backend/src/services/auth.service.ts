@@ -38,26 +38,35 @@ export class AuthService {
 
     async login(email: string, senha: string) {
         const user = await this.userRepo.findByEmail(email);
+
         if (!user) {
             throw new Error('Email ou senha inválidos');
         }
 
-        const ok = await bcrypt.compare(senha, user.senha);
-        if (!ok) {
+        const valid = await bcrypt.compare(senha, user.senha);
+
+        if (!valid) {
             throw new Error('Email ou senha inválidos');
         }
 
         const token = jwt.sign(
-            { id: user._id, role: user.role },
+            {
+                id: user._id,
+                role: user.role
+            },
             process.env.JWT_SECRET as string,
             { expiresIn: '1h' }
         );
 
         return {
             token,
-            nome: user.nome,
-            role: user.role
+            user: {
+                id: user._id,
+                nome: user.nome,
+                email: user.email,
+                role: user.role
+            }
         };
-
     }
+
 }
