@@ -15,7 +15,7 @@
   gap:12px;
 }
 .brand-left img{
-  width: 44px;
+  width: 100px;
   height:auto;
 }
 .brand-left .brand-name{
@@ -89,4 +89,26 @@
 @media (max-width: 900px){
   .cards{ grid-template-columns: 1fr; }
   .page-title{ font-size: 32px; }
+}
+
+/* ===== FIX: centralizar última linha de cards (coordenador) ===== */
+/* coloca no FINAL do app.css para sobrescrever qualquer grid anterior */
+
+.cards{
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 22px !important;
+}
+
+/* largura fixa para os cards ficarem alinhados e centralizar bonito */
+.card-tile{
+  flex: 0 0 320px !important;
+}
+
+/* responsivo */
+@media (max-width: 720px){
+  .card-tile{
+    flex: 1 1 100% !important;
+  }
 }
