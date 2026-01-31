@@ -3,22 +3,57 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
   const email = document.getElementById("email").value.trim();
   const senha = document.getElementById("senha").value;
-  const tipo = document.getElementById("tipo").value; // ALUNO ou TUTOR (modo teste)
+
+  if (!email || !senha) {
+    alert("Informe email e senha.");
+    return;
+  }
 
   try {
-    const result = await login(email, senha, tipo);
+    const res = await fetch("http://localhost:3000/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, senha })
+    });
 
-    // garante que o nome fica salvo
-    if (result?.nome) localStorage.setItem("nome", result.nome);
+    const data = await res.json();
 
-    if (result.role === "ALUNO") {
-      window.location.replace("aluno-home.html");
-    } else if (result.role === "TUTOR") {
-      window.location.replace("tutor-home.html");
-    } else {
-      alert("Tipo de usuário não reconhecido");
+    if (!res.ok) {
+      alert(data.error || "Login inválido.");
+      return;
     }
+
+    // Normaliza o role para evitar problemas de maiúsculas/minúsculas/espaços
+    const role = (data.role || "").toUpperCase().trim();
+
+    // Salva sessão
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("nome", data.nome || "");
+    localStorage.setItem("role", role);
+
+    // Debug útil (se quiser remover depois)
+    console.log("Login OK:", { nome: data.nome, role });
+
+    // Redireciona por papel
+    if (role === "ALUNO") {
+      window.location.href = "aluno-home.html";
+      return;
+    }
+
+    // Aceita TUTOR e, se existir usuário antigo, PROFESSOR
+    if (role === "TUTOR" || role === "PROFESSOR") {
+      window.location.href = "tutor-home.html";
+      return;
+    }
+
+    // Se vier algo inesperado, não deixa passar silencioso
+    alert("Perfil inválido retornado pelo servidor: " + role);
+    window.location.href = "login.html";
+
   } catch (err) {
-    alert(err.message || "Erro no login");
+    console.error(err);
+    alert("Erro ao conectar com o servidor.");
   }
 });

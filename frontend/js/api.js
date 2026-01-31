@@ -1,25 +1,22 @@
-const API_URL = "http://localhost:3333"; // depois você ajusta
+const API_BASE = 'http://localhost:3000';
 
-async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem("token");
+export async function apiFetch(path, options = {}) {
+  const token = localStorage.getItem('token');
 
-  const headers = options.headers || {};
-  headers["Content-Type"] = "application/json";
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
 
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(API_URL + endpoint, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers
+    headers,
   });
 
-  if (response.status === 401) {
-    localStorage.clear();
-    window.location.href = "../pages/login.html";
-    return;
-  }
-
-  return response.json();
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
 }

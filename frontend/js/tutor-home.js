@@ -1,12 +1,10 @@
-// ===== PROTEÇÃO (TOKEN + ROLE) =====
 const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
+const role = (localStorage.getItem("role") || "").toUpperCase().trim();
 
 if (!token) window.location.href = "login.html";
-if (role !== "TUTOR") window.location.href = "aluno-home.html";
-// ===================================
 
-// logout
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  logout();
-});
+// aceita TUTOR (e PROFESSOR se tiver legado)
+if (role !== "TUTOR" && role !== "PROFESSOR") {
+  alert("Acesso negado. Role atual: " + role);
+  window.location.href = "login.html";
+}
