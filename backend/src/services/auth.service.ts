@@ -38,6 +38,9 @@ export class AuthService {
       role,
       senha: hash,
       ativo: true,
+      // tutor nasce pendente
+      tutorValidado: role === 'TUTOR' ? false : undefined,
+      tutorValidadoEm: undefined,
       createdAt: new Date()
     };
 

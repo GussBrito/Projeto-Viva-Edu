@@ -50,7 +50,12 @@ document.getElementById("cadastroForm").addEventListener("submit", async (e) => 
     }
 
     alert("Cadastro realizado com sucesso!");
-    window.location.replace("login.html");
+    if (payload.role === "TUTOR") {
+      window.location.replace("login.html?next=tutor-onboarding");
+    } else {
+      window.location.replace("login.html");
+    }
+
   } catch (err) {
     console.error(err);
     alert("Erro ao conectar com o servidor.");
