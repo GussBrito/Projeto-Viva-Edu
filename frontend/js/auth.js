@@ -4,21 +4,6 @@ function loadUsers(){
 }
 
 async function login(email, senha, roleTeste = "ALUNO") {
-  // ===== LOGIN REAL (quando o backend estiver pronto) =====
-  /*
-  const response = await apiFetch("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, senha })
-  });
-
-  localStorage.setItem("token", response.token);
-  localStorage.setItem("role", response.user.role);
-  localStorage.setItem("nome", response.user.nome);
-  localStorage.setItem("userId", response.user.id);
-
-  return { role: response.user.role, nome: response.user.nome };
-  */
-  // =======================================================
 
   // ===== LOGIN MOCK =====
   if (email && senha) {
@@ -48,5 +33,8 @@ async function login(email, senha, roleTeste = "ALUNO") {
 
 function logout() {
   localStorage.clear();
-  window.location.replace("../pages/login.html");
+  window.location.replace("login.html");
 }
+
+window.logout = logout;
+window.login = login;

@@ -5,17 +5,24 @@ const service = new AuthService();
 
 export class AuthController {
     async register(req: Request, res: Response) {
-        try {
-            const user = await service.register(req.body);
+  try {
+    const { nome, cpf, email, senha, role } = req.body;
 
-            // remove a senha da resposta
-            const { senha, ...userSemSenha } = user;
-
-            return res.status(201).json(userSemSenha);
-        } catch (error: any) {
-            return res.status(400).json({ error: error.message });
-        }
+    // validação mínima obrigatória
+    if (!nome || !cpf || !email || !senha || !role) {
+      return res.status(400).json({
+        error: 'Campos obrigatórios: nome, cpf, email, senha, role'
+      });
     }
+
+    const user = await service.register({ nome, cpf, email, senha, role });
+
+    return res.status(201).json(user);
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+}
+
 
     async login(req: Request, res: Response) {
         try {

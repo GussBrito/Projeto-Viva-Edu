@@ -2,71 +2,102 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { UserMongoRepository } from '../repositories/user.mongo';
 import { UserNeo4jRepository } from '../repositories/user.neo4j';
-import { User } from '../models/user.model';
+import { User, UserRole } from '../models/user.model';
 
 export class AuthService {
-    private userRepo = new UserMongoRepository();
-    private userGraph = new UserNeo4jRepository();
+  private userRepo = new UserMongoRepository();
+  private userGraph = new UserNeo4jRepository();
 
-    async register(data: User) {
-        const existing = await this.userRepo.findByEmail(data.email);
-        if (existing) {
-            throw new Error('Email já cadastrado');
-        }
+  private normalizeEmail(email: string): string {
+    return (email || '').trim().toLowerCase();
+  }
 
-        const hash = await bcrypt.hash(data.senha, 10);
+  private validateRole(role: UserRole): void {
+    const allowed: UserRole[] = ['ALUNO', 'TUTOR', 'COORDENADOR', 'ADMIN'];
+    if (!allowed.includes(role)) {
+      throw new Error('Role inválida');
+    }
+  }
 
-        const user: User = {
-            ...data,
-            senha: hash,
-            createdAt: new Date()
-        };
+  async register(data: User) {
+    const email = this.normalizeEmail(data.email);
+    const role = (data.role as UserRole);
 
-        // 1) salva no Mongo
-        const created = await this.userRepo.create(user);
+    this.validateRole(role);
 
-        // 2) salva o nó no Neo4j
-        await this.userGraph.createUserNode(
-            created._id!, // idMongo
-            created.nome,
-            created.role
-        );
-
-        return created;
-
+    const existing = await this.userRepo.findByEmail(email);
+    if (existing) {
+      throw new Error('Email já cadastrado');
     }
 
-    async login(email: string, senha: string) {
-        const user = await this.userRepo.findByEmail(email);
+    const hash = await bcrypt.hash(data.senha, 10);
 
-        if (!user) {
-            throw new Error('Email ou senha inválidos');
-        }
+    const userToCreate: User = {
+      ...data,
+      email,
+      role,
+      senha: hash,
+      ativo: true,
+      createdAt: new Date()
+    };
 
-        const valid = await bcrypt.compare(senha, user.senha);
+    // 1) salva no Mongo
+    const created = await this.userRepo.create(userToCreate);
 
-        if (!valid) {
-            throw new Error('Email ou senha inválidos');
-        }
+    // 2) salva o nó no Neo4j (mínimo: id, nome, role)
+    await this.userGraph.createUserNode(
+      created._id!, // idMongo
+      created.nome,
+      created.role
+    );
 
-        const token = jwt.sign(
-            {
-                id: user._id,
-                role: user.role
-            },
-            process.env.JWT_SECRET as string,
-            { expiresIn: '1h' }
-        );
+    // não devolve senha
+    return {
+      _id: created._id,
+      nome: created.nome,
+      email: created.email,
+      role: created.role,
+      ativo: (created as any).ativo ?? true,
+      createdAt: created.createdAt
+    };
+  }
 
-        return {
-            token,
-            user: {
-                id: user._id,
-                nome: user.nome,
-                email: user.email,
-                role: user.role
-            }
-        };
+  async login(email: string, senha: string) {
+    const normalizedEmail = this.normalizeEmail(email);
+
+    const user = await this.userRepo.findByEmail(normalizedEmail);
+
+    if (!user) {
+      throw new Error('Email ou senha inválidos');
     }
 
+    if ((user as any).ativo === false) {
+      throw new Error('Usuário desativado');
+    }
+
+    const valid = await bcrypt.compare(senha, user.senha);
+
+    if (!valid) {
+      throw new Error('Email ou senha inválidos');
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role
+      },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '1h' }
+    );
+
+    return {
+      token,
+      user: {
+        id: user._id,
+        nome: user.nome,
+        email: user.email,
+        role: user.role
+      }
+    };
+  }
 }
