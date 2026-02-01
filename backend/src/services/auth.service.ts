@@ -13,7 +13,7 @@ export class AuthService {
   }
 
   private validateRole(role: UserRole): void {
-    const allowed: UserRole[] = ['ALUNO', 'TUTOR', 'COORDENADOR'];
+    const allowed: UserRole[] = ['ALUNO', 'TUTOR', 'COORDENADOR', 'ADMIN'];
     if (!allowed.includes(role)) {
       throw new Error('Role inválida');
     }

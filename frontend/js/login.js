@@ -44,6 +44,10 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       return window.location.replace("coordenador-home.html");
     }
 
+    if (role === "ADMIN") {
+      return window.location.replace("admin-home.html");
+    }
+
     alert("Perfil inválido: " + role);
     window.location.replace("login.html");
 

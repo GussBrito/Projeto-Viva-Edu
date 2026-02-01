@@ -1,8 +1,10 @@
-export type UserRole = 'ALUNO' | 'TUTOR' | 'COORDENADOR';
+export type UserRole = 'ALUNO' | 'TUTOR' | 'COORDENADOR' | 'ADMIN';
+
 
 export interface User {
   _id?: string;
   nome: string;
+  cpf: string;
   email: string;
   senha: string;
   ativo?: boolean;
@@ -19,5 +21,5 @@ export interface User {
   // campos coordenador (opcional por enquanto)
   // ex: unidade?: string;
 
-  createdAt: Date;
+  createdAt?: Date;
 }
