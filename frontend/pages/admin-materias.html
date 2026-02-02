@@ -6,7 +6,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin | VivaEdu</title>
+  <title>Admin - Matérias | VivaEdu</title>
 
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/app.css">
@@ -19,42 +19,50 @@
     <div class="brand-left">
       <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
       <div>
-        <div class="brand-name">Área do Administrador</div>
+        <div class="brand-name">Admin • Matérias</div>
       </div>
     </div>
 
     <nav class="app-nav">
-      <a href="sobre.html">Sobre</a>
-      <a href="perfil.html">Perfil</a>
+      <a href="admin-home.html">Início</a>
       <button id="logoutBtn" class="btn btn-outline" type="button">Sair</button>
     </nav>
   </div>
 </header>
 
 <main class="container page">
-  <div class="page-title">Funções do Admin</div>
+  <div class="page-title">Gerenciar Matérias</div>
 
-  <div class="cards">
-    <a class="card-tile" href="admin-usuarios.html">
-      <img src="../src/icons/perfil.png" alt="">
-      <h3>Usuários</h3>
-    </a>
+  <section class="card admin-card">
+    <div class="filters">
+      <input id="materiaNome" placeholder="Nome da matéria (ex: Matemática)" />
+      <input id="materiaDesc" placeholder="Descrição (opcional)" />
+      <button class="btn btn-primary" id="addMateriaBtn" type="button">Adicionar</button>
+      <button class="btn btn-outline" id="reloadMateriasBtn" type="button">Atualizar</button>
+    </div>
 
-    <a class="card-tile" href="admin-materias.html">
-      <img src="../src/icons/materiais.png" alt="">
-      <h3>Matérias</h3>
-    </a>
-  </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th style="width:260px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="materiasTable"></tbody>
+      </table>
+    </div>
+  </section>
 </main>
 
 <footer class="footer">
   <p>© 2026 – VivaEdu</p>
-  <p>Projeto acadêmico desenvolvido para fins educacionais. Não possui finalidade comercial.</p>
-  <p>Desenvolvido por <strong>Luiz Gustavo Brito</strong>, <strong>Vanessa Beatriz</strong> e <strong>Samuel Marcos Souza</strong></p>
 </footer>
 
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
-<script src="../js/admin-home.js"></script>
+<script src="../js/admin-materias.js"></script>
 </body>
 </html>
