@@ -43,23 +43,35 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     if (role === "TUTOR") {
       try {
-        // pega dados do usuário logado para checar validação
-        const me = await api("/users/me"); // usa token
+        const me = await api("/users/me");
+
         const tutorValidado = me?.tutorValidado === true;
+        const temPerfil = !!me?.areaAtuacao && !!me?.formacao && !!me?.situacaoCurso;
+        const temDocs = !!me?.docs?.comprovanteUrl && !!me?.docs?.identidadeUrl;
 
-        localStorage.setItem("tutorValidado", String(tutorValidado));
-
-        if (!tutorValidado) {
+        // ainda não completou validacao -> manda completar
+        if (!temPerfil || !temDocs) {
+          alert("Complete seu cadastro de tutor antes de continuar.");
           return window.location.replace("tutor-validacao.html");
         }
 
+        // completou, mas ainda não validado -> só avisa e fica no login
+        if (!tutorValidado) {
+          alert("Aguarde o coordenador validar o seu perfil.");
+          return; // não redireciona
+        }
+
+        // validado -> entra normal
         return window.location.replace("tutor-home.html");
+
       } catch (err) {
         console.error(err);
-        // fallback: se não conseguir ler /users/me, manda pro home do tutor
-        return window.location.replace("tutor-home.html");
+        alert("Não foi possível verificar seu status agora. Tente novamente.");
+        return; // fica no login
       }
     }
+
+
 
     alert("Perfil inválido: " + role);
     window.location.replace("login.html");

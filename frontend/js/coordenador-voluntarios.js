@@ -1,6 +1,6 @@
 // ===== PROTEÇÃO (TOKEN + ROLE) =====
 const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
+const role = (localStorage.getItem("role") || "").toUpperCase().trim();
 
 if (!token) window.location.replace("login.html");
 if (role !== "COORDENADOR") window.location.replace("login.html");
@@ -10,28 +10,71 @@ document.getElementById("logoutBtn").addEventListener("click", () => logout());
 
 const lista = document.getElementById("listaVoluntarios");
 
-// MOCK — depois vem do backend:
-// GET /tutors (lista) e PUT /tutors/:id/validate (aprovar)
-let voluntarios = [
-  { id: 1, nome: "João Tutor", area: "Letras", validado: false },
-  { id: 2, nome: "Maria Tutor", area: "Matemática", validado: true },
-];
+// Agora vem do backend:
+let voluntarios = []; // array de users (tutores pendentes)
+
+function fileUrl(path) {
+  // backend devolve /uploads/tutors/...
+  if (!path) return "";
+  return `http://localhost:3000${path}`;
+}
+
+async function loadPendentes() {
+  try {
+    // ✅ rota real do backend
+    const pendentes = await api("/tutors/pending");
+    voluntarios = Array.isArray(pendentes) ? pendentes : [];
+    render();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Erro ao carregar voluntários pendentes.");
+    voluntarios = [];
+    render();
+  }
+}
 
 function render() {
   lista.innerHTML = "";
+
+  if (voluntarios.length === 0) {
+    lista.innerHTML = `<div class="list-card">Nenhum tutor pendente</div>`;
+    return;
+  }
 
   voluntarios.forEach(v => {
     const div = document.createElement("div");
     div.className = "list-card";
 
+    const status = (v.tutorValidado === true) ? "VALIDADO" : "PENDENTE";
+
+    const comprovante = v?.docs?.comprovanteUrl;
+    const identidade = v?.docs?.identidadeUrl;
+
     div.innerHTML = `
       <strong>${v.nome}</strong><br>
-      Área de formação: ${v.area}<br>
-      Status: ${v.validado ? "VALIDADO" : "PENDENTE"}<br><br>
+      E-mail: ${v.email || "-"}<br>
+      Área de atuação: ${v.areaAtuacao || "-"}<br>
+      Formação: ${v.formacao || "-"}<br>
+      Situação do curso: ${v.situacaoCurso || "-"}<br>
+      Status: ${status}<br><br>
+
       ${
-        v.validado
+        comprovante
+          ? `<a class="btn btn-outline" href="${fileUrl(comprovante)}" target="_blank" rel="noopener">Ver comprovante</a>`
+          : `<button class="btn btn-outline" disabled type="button">Sem comprovante</button>`
+      }
+      ${
+        identidade
+          ? `<a class="btn btn-outline" href="${fileUrl(identidade)}" target="_blank" rel="noopener" style="margin-left:8px;">Ver identidade</a>`
+          : `<button class="btn btn-outline" disabled type="button" style="margin-left:8px;">Sem identidade</button>`
+      }
+
+      <br><br>
+
+      ${
+        v.tutorValidado
           ? `<button class="btn btn-outline" disabled type="button">Já validado</button>`
-          : `<button class="btn btn-primary" type="button" onclick="validar(${v.id})">Validar</button>`
+          : `<button class="btn btn-primary" type="button" onclick="validar('${v._id}')">Validar</button>`
       }
     `;
 
@@ -39,15 +82,26 @@ function render() {
   });
 }
 
-window.validar = function(id){
-  const ok = confirm("Deseja validar este voluntário?");
+window.validar = async function(id) {
+  const ok = confirm("Deseja validar este tutor?");
   if (!ok) return;
 
-  voluntarios = voluntarios.map(v => v.id === id ? { ...v, validado: true } : v);
-  render();
+  try {
+    // ✅ valida no backend
+    await api(`/tutors/${id}/validate`, {
+      method: "PUT",
+      body: { validado: true }
+    });
 
-  // Futuro backend:
-  // await apiFetch(`/tutors/${id}/validate`, { method: "PUT" });
+    alert("Tutor validado com sucesso");
+
+    // Recarrega lista (some da lista pendente)
+    await loadPendentes();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Erro ao validar tutor.");
+  }
 };
 
-render();
+// carrega ao entrar na seção
+loadPendentes();

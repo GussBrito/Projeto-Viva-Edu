@@ -34,27 +34,54 @@ document.getElementById("cadastroForm").addEventListener("submit", async (e) => 
   };
 
   try {
+    // 1) cadastra
     const res = await fetch("http://localhost:3000/auth/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
       alert(data.error || "Erro ao cadastrar.");
       return;
     }
 
-    alert("Cadastro realizado com sucesso!");
+    //Se for TUTOR: auto-login e vai pro onboarding
     if (payload.role === "TUTOR") {
-      window.location.replace("login.html?next=tutor-onboarding");
-    } else {
-      window.location.replace("login.html");
+      const loginRes = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, senha })
+      });
+
+      const loginData = await loginRes.json().catch(() => ({}));
+
+      if (!loginRes.ok) {
+        // fallback: se login falhar, manda pro login normal
+        alert("Cadastro ok! Agora faça login para completar seu perfil.");
+        window.location.replace("login.html");
+        return;
+      }
+
+      const role = (loginData.user?.role || "").toUpperCase().trim();
+      const nomeUser = loginData.user?.nome || "";
+      const userId = loginData.user?.id || "";
+
+      localStorage.setItem("token", loginData.token);
+      localStorage.setItem("nome", nomeUser);
+      localStorage.setItem("role", role);
+      localStorage.setItem("userId", userId);
+
+      alert("Cadastro realizado! Complete seu perfil de tutor.");
+      window.location.replace("tutor-validacao.html");
+      return;
     }
+
+    // Para os outros perfis, segue normal
+    alert("Cadastro realizado com sucesso!");
+    window.location.replace("login.html");
 
   } catch (err) {
     console.error(err);
