@@ -56,6 +56,13 @@ export class AgendamentoMongoRepository {
         return result.deletedCount === 1;
     }
 
+    async findConfirmedByAulaIds(aulaIds: string[]) {
+        if (!aulaIds.length) return [];
+        return this.collection()
+            .find({ aulaId: { $in: aulaIds }, status: 'CONFIRMADO' } as any)
+            .toArray();
+    }
+
     // agendamentos.mongo.ts
     async deleteByAulaId(aulaId: string) {
         const result = await this.collection().deleteMany({ aulaId } as any);

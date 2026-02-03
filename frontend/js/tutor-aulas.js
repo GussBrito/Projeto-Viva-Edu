@@ -182,7 +182,7 @@ function renderizar() {
               <li style="margin:6px 0;">
                 ${escapeHtml(al.nome)}
                 <button class="btn btn-outline" type="button"
-                  onclick="verPerfil(${al.id})"
+                  onclick="verPerfil('${encodeURIComponent(al.id)}')"
                   style="margin-left:10px;">
                   Ver perfil
                 </button>
@@ -263,7 +263,7 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-window.editarAula = function(id) {
+window.editarAula = function (id) {
   const aula = aulas.find(a => a._id === id);
   if (!aula) return;
 
@@ -286,7 +286,7 @@ window.editarAula = function(id) {
   }
 };
 
-window.excluirAula = async function(id) {
+window.excluirAula = async function (id) {
   if (!confirm("Deseja excluir esta aula?")) return;
 
   try {
@@ -311,7 +311,7 @@ function limparForm() {
 }
 
 // ===== PERFIL PÚBLICO =====
-window.verPerfil = function(userId){
+window.verPerfil = function (userId) {
   window.location.href = `perfil-publico.html?id=${encodeURIComponent(userId)}`;
 };
 
@@ -331,7 +331,7 @@ modal.addEventListener("click", (e) => {
   if (e.target === modal) closeModal();
 });
 
-window.abrirRelatorio = function(aulaId){
+window.abrirRelatorio = function (aulaId) {
   const aula = aulas.find(a => a._id === aulaId);
   if (!aula) return;
 
@@ -354,7 +354,7 @@ window.abrirRelatorio = function(aulaId){
   openModal();
 };
 
-function readAsDataURL(file){
+function readAsDataURL(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
@@ -363,11 +363,11 @@ function readAsDataURL(file){
   });
 }
 
-function loadReports(){
+function loadReports() {
   try { return JSON.parse(localStorage.getItem("reports") || "[]"); }
   catch { return []; }
 }
-function saveReports(arr){
+function saveReports(arr) {
   localStorage.setItem("reports", JSON.stringify(arr));
 }
 

@@ -13,10 +13,7 @@ const searchInput = document.getElementById("searchInput");
 const statusFilter = document.getElementById("statusFilter");
 const reloadBtn = document.getElementById("reloadBtn");
 
-// ⚠️ AJUSTE AQUI se sua rota do tutor for diferente
-// exemplos comuns:
-// const AG_TUTOR_PATH = "/agendamentos/mine";
-// const AG_TUTOR_PATH = "/agendamentos/me";
+//rota turor agendamentos
 const AG_TUTOR_PATH = "/agendamentos/mine";
 
 let agsRaw = [];    // retorno do backend (agendamentos)
@@ -106,7 +103,8 @@ function montarViewModel() {
                     hora,
                     localNome: local?.nome || "Não informado",
                 },
-                alunoId: ag.alunoId || ""
+                alunoId: ag.alunoId || "",
+                alunoNome: ag.alunoNome || ""
             };
         })
         .filter(Boolean); //remove nulls
@@ -146,7 +144,7 @@ function renderizar() {
 
         div.innerHTML = `
       <strong>${escapeHtml(item.aula.materia)}</strong> - ${escapeHtml(item.aula.titulo)}<br>
-      AlunoId: ${escapeHtml(item.alunoId)}<br>
+      Aluno: ${escapeHtml(item.alunoNome || item.alunoId || "Aluno")}<br>
       Data: ${item.aula.data ? formatarData(item.aula.data) : "-"} às ${escapeHtml(item.aula.hora || "-")}<br>
       Local: ${escapeHtml(item.aula.localNome)}<br>
       Status: <strong>${escapeHtml(item.status)}</strong><br><br>

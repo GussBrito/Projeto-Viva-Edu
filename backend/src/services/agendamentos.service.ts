@@ -1,10 +1,10 @@
 import { AgendamentoMongoRepository } from '../repositories/agendamentos.mongo';
-import { Agendamento } from '../models/agendamento.model';
-import { AgendamentoStatus } from '../models/agendamento.model';
+import { Agendamento, AgendamentoStatus } from '../models/agendamento.model';
 
 import { AulaMongoRepository } from '../repositories/aula.mongo';
 import { MateriaMongoRepository } from '../repositories/materia.mongo';
 import { UserMongoRepository } from '../repositories/user.mongo';
+import { UserNeo4jRepository } from '../repositories/user.neo4j';
 
 type AgendamentoMeView = {
   _id: string;
@@ -26,6 +26,7 @@ export class AgendamentosService {
   private aulasRepo = new AulaMongoRepository();
   private materiasRepo = new MateriaMongoRepository();
   private usersRepo = new UserMongoRepository();
+  private graph = new UserNeo4jRepository();
 
   async createAgendamento(alunoId: string, aulaId: string): Promise<Agendamento> {
     const aula = await this.aulasRepo.findById(aulaId);
@@ -46,16 +47,23 @@ export class AgendamentosService {
       createdAt: new Date()
     };
 
-    return this.repo.create(ag);
+    // cria no Mongo
+    const created = await this.repo.create(ag);
+
+    // cria relação no Neo4j: (Aluno)-[:AGENDA {status:PENDENTE}]->(Aula)
+    // Pressupõe que o nó Aula já existe (criado ao criar aula)
+    await this.graph.createAlunoAgendaAula(alunoId, aulaId, 'PENDENTE');
+
+    return created;
   }
 
-  // ✅ AGORA RETORNA "LIMPO" COM tutorNome + materiaNome
+  //RETORNO "LIMPO" COM tutorNome + materiaNome
   async listMyAgendamentos(alunoId: string): Promise<AgendamentoMeView[]> {
     const ags = await this.repo.findByAluno(alunoId);
 
     const aulaIds = [...new Set(ags.map(a => a.aulaId).filter(Boolean))];
 
-    // tenta batch (findByIds). Se não existir, cai no fallback (findById um por um)
+    // tenta batch (findByIds). Se não existir, fallback
     let aulas: any[] = [];
     const anyRepo = this.aulasRepo as any;
 
@@ -121,7 +129,17 @@ export class AgendamentosService {
   }
 
   async listMineTutor(tutorId: string) {
-    return this.repo.findByTutor(tutorId);
+    const list = await this.repo.findByTutor(tutorId);
+
+    const alunoIds = Array.from(new Set((list || []).map(a => a.alunoId).filter(Boolean)));
+
+    const alunos = await this.usersRepo.findPublicByIds(alunoIds);
+    const alunoNomeById = new Map(alunos.map((u: any) => [String(u._id), u.nome]));
+
+    return (list || []).map((ag: any) => ({
+      ...ag,
+      alunoNome: alunoNomeById.get(String(ag.alunoId)) || 'Aluno'
+    }));
   }
 
   private async changeStatusAsTutor(tutorId: string, agId: string, status: AgendamentoStatus) {
@@ -136,8 +154,13 @@ export class AgendamentosService {
       throw new Error('Só é possível alterar agendamentos PENDENTES');
     }
 
+    // atualiza Mongo
     const ok = await this.repo.setStatus(agId, status);
     if (!ok) throw new Error('Falha ao atualizar status');
+
+    // atualiza Neo4j: status na relação (Aluno)-[:AGENDA]->(Aula)
+    await this.graph.updateAgendaStatus((ag as any).alunoId, (ag as any).aulaId, status);
+
     return { status };
   }
 
@@ -161,8 +184,12 @@ export class AgendamentosService {
       throw new Error('Só é possível cancelar agendamentos PENDENTES');
     }
 
+    // remove do Mongo
     const ok = await this.repo.deleteById(agId);
     if (!ok) throw new Error('Falha ao cancelar agendamento');
+
+    // remove a relação no Neo4j
+    await this.graph.deleteAgendaRelation(alunoId, (ag as any).aulaId);
 
     return { cancelled: true };
   }
