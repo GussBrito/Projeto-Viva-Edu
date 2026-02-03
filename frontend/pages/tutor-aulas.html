@@ -19,7 +19,6 @@
     <div class="brand-left">
       <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
       <div>
-        
         <div class="brand-name">Minhas Aulas</div>
       </div>
     </div>
@@ -45,7 +44,11 @@
     <form id="aulaForm">
       <input type="hidden" id="aulaId">
 
-      <input type="text" id="disciplina" placeholder="Disciplina" required>
+      <!-- ✅ antes era input text; agora é select puxando do backend -->
+      <select id="disciplina" required>
+        <option value="">Carregando disciplinas...</option>
+      </select>
+
       <input type="text" id="assunto" placeholder="Assunto" required>
       <input type="date" id="data" required>
       <input type="time" id="hora" required>

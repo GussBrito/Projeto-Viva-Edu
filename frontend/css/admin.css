@@ -1,63 +1,96 @@
-.app-header{
-  background:#fff;
-  border-bottom:1px solid var(--border);
+/* admin.css */
+
+.admin-card{
+  border-radius: var(--radius);
   box-shadow: var(--shadowSoft);
+  border: 1px solid var(--border);
+  padding: 16px;
 }
 
-.header-flex{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:18px 0;
-}
-
-.card{
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:24px;
-  margin-top:26px;
-}
-
+/* filtros */
 .filters{
-  display:grid;
-  grid-template-columns: 1fr 200px auto;
-  gap:12px;
-  margin:18px 0 22px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin: 10px 0 14px;
+  align-items:center;
 }
 
+/* tabela */
 .table-wrap{
+  width:100%;
   overflow:auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background:#fff;
 }
 
 table{
   width:100%;
-  border-collapse:collapse;
+  border-collapse: collapse;
+  min-width: 760px;
 }
 
-th{
+thead th{
   text-align:left;
-  padding:14px;
-  background:#fafafa;
-  border-bottom:1px solid var(--border);
+  font-size: 13px;
+  color: var(--muted);
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  background: #fafafa;
 }
 
-td{
-  padding:14px;
-  border-bottom:1px solid var(--border);
+tbody td{
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
 
-td:last-child{
+tbody tr:hover{
+  background: rgba(0,0,0,.02);
+}
+
+/* badges */
+.badge{
+  display:inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  border: 1px solid var(--border);
+}
+
+.badge.active{
+  background: rgba(0,140,60,.10);
+  color: #0a6b35;
+}
+
+.badge.inactive{
+  background: rgba(180,0,0,.08);
+  color: #a00000;
+}
+
+/* ações */
+.actions{
   display:flex;
   gap:8px;
+  flex-wrap:wrap;
 }
 
-.badge{
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:700;
+/* inputs inline (editar matéria) */
+.inline-input{
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 14px;
 }
 
-.badge.active{ background:rgba(0,150,0,.12); color:#0a7a29; }
-.badge.inactive{ background:rgba(200,0,0,.12); color:#a00000; }
+/* select role dentro da tabela */
+.role-select{
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+}
