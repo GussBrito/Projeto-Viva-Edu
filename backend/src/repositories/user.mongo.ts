@@ -127,4 +127,21 @@ export class UserMongoRepository {
 
     return result.matchedCount === 1;
   }
+
+  // Buscar vários usuários públicos por IDs (sem senha)
+  async findPublicByIds(ids: string[]) {
+    const objectIds = ids
+      .filter(Boolean)
+      .map(id => new ObjectId(id));
+
+    const users = await this.collection()
+      .find(
+        { _id: { $in: objectIds } } as any,
+        { projection: { senha: 0 } as any }
+      )
+      .toArray();
+
+    // garante _id string
+    return users.map(u => ({ ...u, _id: String((u as any)._id) }));
+  }
 }

@@ -5,43 +5,68 @@ import { Agendamento, AgendamentoStatus } from '../models/agendamento.model';
 const COLLECTION = 'agendamentos';
 
 export class AgendamentoMongoRepository {
-  private collection() {
-    return client.db().collection<Agendamento>(COLLECTION);
-  }
+    private collection() {
+        return client.db().collection<Agendamento>(COLLECTION);
+    }
 
-  async create(doc: Agendamento) {
-    const result = await this.collection().insertOne(doc);
-    return { ...doc, _id: result.insertedId.toString() };
-  }
+    private toStringId(doc: any) {
+        if (!doc) return doc;
+        return { ...doc, _id: String(doc._id) };
+    }
 
-  async findPendingByAulaAndAluno(aulaId: string, alunoId: string) {
-    return this.collection().findOne({
-      aulaId,
-      alunoId,
-      status: { $in: ['PENDENTE', 'CONFIRMADO'] }
-    } as any);
-  }
+    async create(doc: Agendamento) {
+        const result = await this.collection().insertOne(doc);
+        return { ...doc, _id: result.insertedId.toString() };
+    }
 
-  async findByAluno(alunoId: string) {
-    return this.collection().find({ alunoId } as any).toArray();
-  }
+    async findPendingByAulaAndAluno(aulaId: string, alunoId: string) {
+        const doc = await this.collection().findOne({
+            aulaId,
+            alunoId,
+            status: { $in: ['PENDENTE', 'CONFIRMADO'] }
+        } as any);
+        return this.toStringId(doc);
+    }
 
-  // ✅ NOVO: listar agendamentos do tutor
-  async findByTutor(tutorId: string) {
-    return this.collection().find({ tutorId } as any).toArray();
-  }
+    async findByAluno(alunoId: string) {
+        const docs = await this.collection().find({ alunoId } as any).toArray();
+        return docs.map(d => this.toStringId(d));
+    }
 
-  // ✅ NOVO: buscar por id (pra validar dono)
-  async findById(id: string) {
-    return this.collection().findOne({ _id: new ObjectId(id) } as any);
-  }
+    async findByTutor(tutorId: string) {
+        const docs = await this.collection().find({ tutorId } as any).toArray();
+        return docs.map(d => this.toStringId(d));
+    }
 
-  // ✅ NOVO: atualizar status
-  async setStatus(id: string, status: AgendamentoStatus) {
-    const result = await this.collection().updateOne(
-      { _id: new ObjectId(id) } as any,
-      { $set: { status } }
-    );
-    return result.matchedCount === 1;
-  }
+    async findById(id: string) {
+        const doc = await this.collection().findOne({ _id: new ObjectId(id) } as any);
+        return this.toStringId(doc);
+    }
+
+    async setStatus(id: string, status: AgendamentoStatus) {
+        const result = await this.collection().updateOne(
+            { _id: new ObjectId(id) } as any,
+            { $set: { status } }
+        );
+        return result.matchedCount === 1;
+    }
+
+    async deleteById(id: string) {
+        const result = await this.collection().deleteOne({ _id: new ObjectId(id) } as any);
+        return result.deletedCount === 1;
+    }
+
+    async findConfirmedByAulaIds(aulaIds: string[]) {
+        if (!aulaIds.length) return [];
+        return this.collection()
+            .find({ aulaId: { $in: aulaIds }, status: 'CONFIRMADO' } as any)
+            .toArray();
+    }
+
+    // agendamentos.mongo.ts
+    async deleteByAulaId(aulaId: string) {
+        const result = await this.collection().deleteMany({ aulaId } as any);
+        return result.deletedCount; // quantos apagou
+    }
+
 }

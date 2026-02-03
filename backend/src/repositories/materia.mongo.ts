@@ -53,4 +53,32 @@ export class MateriaMongoRepository {
     const res = await this.collection().deleteOne({ _id: oid } as any);
     return res.deletedCount === 1;
   }
+
+  //buscar vários usuários públicos por IDs
+  async findPublicByIds(ids: string[]) {
+    const objectIds = ids
+      .filter(Boolean)
+      .map(id => new ObjectId(id));
+
+    const users = await this.collection()
+      .find(
+        { _id: { $in: objectIds } } as any,
+        { projection: { senha: 0 } as any }
+      )
+      .toArray();
+
+    // garante _id string
+    return users.map(u => ({ ...u, _id: String((u as any)._id) }));
+  }
+  async findByIds(ids: string[]) {
+    const objectIds = ids
+      .filter(Boolean)
+      .map(id => new ObjectId(id));
+
+    const materias = await this.collection()
+      .find({ _id: { $in: objectIds } } as any)
+      .toArray();
+
+    return materias.map(m => ({ ...m, _id: String((m as any)._id) }));
+  }
 }
