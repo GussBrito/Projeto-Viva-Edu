@@ -1,6 +1,6 @@
 // ===== PROTEÇÃO (TOKEN + ROLE) =====
 const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
+const role = (localStorage.getItem("role") || "").toUpperCase().trim();
 
 if (!token) window.location.replace("login.html");
 if (role !== "TUTOR") window.location.replace("aluno-home.html");
@@ -13,7 +13,7 @@ const form = document.getElementById("aulaForm");
 const lista = document.getElementById("listaAulas");
 
 const inputId = document.getElementById("aulaId");
-const inputDisciplina = document.getElementById("disciplina");
+const inputDisciplina = document.getElementById("disciplina"); // ✅ agora é SELECT de materias
 const inputAssunto = document.getElementById("assunto");
 const inputData = document.getElementById("data");
 const inputHora = document.getElementById("hora");
@@ -24,7 +24,7 @@ const inputLocalNome = document.getElementById("localNome");
 const btnSelecionarLocal = document.getElementById("btnSelecionarLocal");
 const btnCancelar = document.getElementById("cancelarEdicao");
 
-// MODAL RELATÓRIO
+// MODAL RELATÓRIO (mantém mock por enquanto)
 const modal = document.getElementById("modalRelatorio");
 const modalInfo = document.getElementById("modalInfoAula");
 const modalTitle = document.getElementById("modalTitle");
@@ -36,37 +36,9 @@ const fileInput = document.getElementById("arquivoRelatorio");
 
 let aulaSelecionadaParaRelatorio = null;
 
-/**
- * MOCK DE AULAS
- * No mundo real isso vem do backend.
- * Aqui cada aula já tem "alunosMatriculados" (mock) com id e nome,
- * para o tutor conseguir abrir perfil público dos alunos.
- */
-let aulas = [
-  {
-    id: 1,
-    disciplina: "Português",
-    assunto: "Regência",
-    data: "2026-02-05",
-    hora: "19:00",
-    local: { nome: "IFPB - Cajazeiras (Bloco A)", latitude: -6.8892, longitude: -38.5577 },
-    alunosMatriculados: [
-      { id: 2001, nome: "Aluno 1" },
-      { id: 2002, nome: "Aluno 2" }
-    ]
-  },
-  {
-    id: 2,
-    disciplina: "Matemática",
-    assunto: "Função do 1º Grau",
-    data: "2026-02-06",
-    hora: "18:30",
-    local: { nome: "Biblioteca Municipal", latitude: -6.8901, longitude: -38.5589 },
-    alunosMatriculados: [
-      { id: 2003, nome: "Aluno 3" }
-    ]
-  }
-];
+// ===== Estado vindo do backend =====
+let aulas = [];
+let materias = []; // ✅ lista de matérias do backend
 
 // ===== LOCAL (selecionar no mapa placeholder) =====
 btnSelecionarLocal.addEventListener("click", () => {
@@ -101,6 +73,89 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+// junta data + hora em ISO
+function buildISO(data, hora) {
+  return new Date(`${data}T${hora}:00`).toISOString();
+}
+
+function splitISO(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return { data: "", hora: "" };
+
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+
+  return { data: `${yyyy}-${mm}-${dd}`, hora: `${hh}:${mi}` };
+}
+
+function parseLocalFromLocalId(localId) {
+  if (!localId) return null;
+  try {
+    return JSON.parse(localId);
+  } catch {
+    return null;
+  }
+}
+
+// ✅ pegar nome da matéria pelo id
+function materiaNome(materiaId) {
+  const m = materias.find(x => x._id === materiaId);
+  return m?.nome || materiaId || "Matéria";
+}
+
+// ===== MATÉRIAS (para o SELECT) =====
+async function carregarMaterias() {
+  try {
+    const data = await api("/materias");
+    materias = Array.isArray(data) ? data : [];
+    preencherSelectMaterias();
+  } catch (err) {
+    console.error(err);
+    inputDisciplina.innerHTML = `<option value="">Erro ao carregar disciplinas</option>`;
+    alert(err.message || "Erro ao carregar disciplinas.");
+  }
+}
+
+function preencherSelectMaterias() {
+  const ativas = materias.filter(m => m.ativo !== false);
+
+  inputDisciplina.innerHTML = `
+    <option value="">Selecione a disciplina...</option>
+    ${ativas.map(m => `<option value="${m._id}">${escapeHtml(m.nome)}</option>`).join("")}
+  `;
+
+  if (ativas.length === 0) {
+    inputDisciplina.innerHTML = `<option value="">Nenhuma disciplina disponível</option>`;
+  }
+}
+
+// ===== BACKEND =====
+async function carregarMinhasAulas() {
+  try {
+    const data = await api("/aulas/mine");
+    aulas = Array.isArray(data) ? data : [];
+    renderizar();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Erro ao carregar aulas do tutor.");
+  }
+}
+
+async function criarAula(payload) {
+  return api("/aulas", { method: "POST", body: payload });
+}
+
+async function atualizarAula(id, patch) {
+  return api(`/aulas/${id}`, { method: "PUT", body: patch });
+}
+
+async function removerAula(id) {
+  return api(`/aulas/${id}`, { method: "DELETE" });
+}
+
 // ===== RENDER =====
 function renderizar() {
   lista.innerHTML = "";
@@ -117,7 +172,6 @@ function renderizar() {
     const div = document.createElement("div");
     div.className = "list-card";
 
-    // alunos matriculados
     const alunos = Array.isArray(a.alunosMatriculados) ? a.alunosMatriculados : [];
     const alunosHtml = alunos.length
       ? `
@@ -139,17 +193,24 @@ function renderizar() {
       `
       : `<div style="margin-top:10px;color:var(--muted);">Nenhum aluno matriculado ainda.</div>`;
 
+    const localObj = parseLocalFromLocalId(a.localId);
+    const localNome = localObj?.nome || "Não informado";
+
+    const { data, hora } = splitISO(a.dataHora || "");
+    const dataFmt = data ? formatarData(data) : "-";
+    const horaFmt = hora || "-";
+
     div.innerHTML = `
-      <strong>${escapeHtml(a.disciplina)}</strong> - ${escapeHtml(a.assunto)}<br>
-      Data: ${formatarData(a.data)} às ${escapeHtml(a.hora)}<br>
-      Local: ${escapeHtml(a.local?.nome || "Não informado")}<br>
+      <strong>${escapeHtml(materiaNome(a.materiaId))}</strong> - ${escapeHtml(a.titulo || "")}<br>
+      Data: ${dataFmt} às ${escapeHtml(horaFmt)}<br>
+      Local: ${escapeHtml(localNome)}<br>
 
       ${alunosHtml}
 
       <div style="margin-top:12px;">
-        <button class="btn btn-outline" type="button" onclick="editarAula(${a.id})">Editar</button>
-        <button class="btn btn-outline" type="button" onclick="excluirAula(${a.id})">Excluir</button>
-        <button class="btn btn-primary" type="button" onclick="abrirRelatorio(${a.id})">Finalizar / Relatório</button>
+        <button class="btn btn-outline" type="button" onclick="editarAula('${a._id}')">Editar</button>
+        <button class="btn btn-outline" type="button" onclick="excluirAula('${a._id}')">Excluir</button>
+        <button class="btn btn-primary" type="button" onclick="abrirRelatorio('${a._id}')">Finalizar / Relatório</button>
       </div>
     `;
 
@@ -158,13 +219,19 @@ function renderizar() {
 }
 
 // ===== CRUD AULA =====
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const disciplina = inputDisciplina.value.trim();
-  const assunto = inputAssunto.value.trim();
+  const materiaId = (inputDisciplina.value || "").trim(); // ✅ agora vem do select
+  const titulo = inputAssunto.value.trim();
+  const descricao = inputAssunto.value.trim();
   const data = inputData.value;
   const hora = inputHora.value;
+
+  if (!materiaId || !titulo || !data || !hora) {
+    alert("Selecione a disciplina e preencha assunto, data e hora.");
+    return;
+  }
 
   if (!inputLocalJson.value) {
     alert("Selecione um local no mapa antes de salvar a aula.");
@@ -175,50 +242,60 @@ form.addEventListener("submit", (e) => {
   try { local = JSON.parse(inputLocalJson.value); }
   catch { return alert("Local inválido. Selecione novamente no mapa."); }
 
-  if (inputId.value) {
-    const aula = aulas.find(a => a.id == inputId.value);
-    if (!aula) return;
+  const dataHora = buildISO(data, hora);
+  const localId = JSON.stringify(local);
 
-    aula.disciplina = disciplina;
-    aula.assunto = assunto;
-    aula.data = data;
-    aula.hora = hora;
-    aula.local = local;
-  } else {
-    aulas.push({
-      id: Date.now(),
-      disciplina,
-      assunto,
-      data,
-      hora,
-      local,
-      alunosMatriculados: [] // começa vazio
-    });
+  try {
+    if (inputId.value) {
+      await atualizarAula(inputId.value, { materiaId, titulo, descricao, dataHora, localId });
+      alert("Aula atualizada!");
+    } else {
+      await criarAula({ materiaId, titulo, descricao, dataHora, localId });
+      alert("Aula criada!");
+    }
+
+    localStorage.removeItem("selected_local");
+    limparForm();
+    await carregarMinhasAulas();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Erro ao salvar aula.");
   }
-
-  localStorage.removeItem("selected_local");
-  limparForm();
-  renderizar();
 });
 
 window.editarAula = function(id) {
-  const aula = aulas.find(a => a.id === id);
+  const aula = aulas.find(a => a._id === id);
   if (!aula) return;
 
-  inputId.value = aula.id;
-  inputDisciplina.value = aula.disciplina;
-  inputAssunto.value = aula.assunto;
-  inputData.value = aula.data;
-  inputHora.value = aula.hora;
+  inputId.value = aula._id;
 
-  inputLocalJson.value = JSON.stringify(aula.local);
-  inputLocalNome.value = aula.local?.nome || "";
+  inputDisciplina.value = aula.materiaId || "";
+  inputAssunto.value = aula.titulo || "";
+
+  const { data, hora } = splitISO(aula.dataHora || "");
+  inputData.value = data;
+  inputHora.value = hora;
+
+  if (aula.localId) {
+    inputLocalJson.value = aula.localId;
+    const loc = parseLocalFromLocalId(aula.localId);
+    inputLocalNome.value = loc?.nome || "";
+  } else {
+    inputLocalJson.value = "";
+    inputLocalNome.value = "Nenhum local selecionado";
+  }
 };
 
-window.excluirAula = function(id) {
+window.excluirAula = async function(id) {
   if (!confirm("Deseja excluir esta aula?")) return;
-  aulas = aulas.filter(a => a.id !== id);
-  renderizar();
+
+  try {
+    await removerAula(id);
+    await carregarMinhasAulas();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Erro ao excluir aula.");
+  }
 };
 
 btnCancelar.addEventListener("click", () => {
@@ -238,7 +315,7 @@ window.verPerfil = function(userId){
   window.location.href = `perfil-publico.html?id=${encodeURIComponent(userId)}`;
 };
 
-// ===== MODAL RELATÓRIO =====
+// ===== MODAL RELATÓRIO (continua mock por enquanto) =====
 function openModal() { modal.classList.add("open"); }
 function closeModal() {
   modal.classList.remove("open");
@@ -250,22 +327,25 @@ function closeModal() {
 btnFecharModal.addEventListener("click", closeModal);
 btnCancelarRelatorio.addEventListener("click", closeModal);
 
-// fecha clicando fora
 modal.addEventListener("click", (e) => {
   if (e.target === modal) closeModal();
 });
 
 window.abrirRelatorio = function(aulaId){
-  const aula = aulas.find(a => a.id === aulaId);
+  const aula = aulas.find(a => a._id === aulaId);
   if (!aula) return;
 
   aulaSelecionadaParaRelatorio = aula;
-  modalTitle.textContent = `Relatório da Aula (#${aula.id})`;
+  modalTitle.textContent = `Relatório da Aula (#${aula._id})`;
+
+  const { data, hora } = splitISO(aula.dataHora || "");
+  const dataFmt = data ? formatarData(data) : "-";
+  const localObj = parseLocalFromLocalId(aula.localId);
 
   modalInfo.innerHTML = `
-    <strong>${escapeHtml(aula.disciplina)}</strong> - ${escapeHtml(aula.assunto)}<br>
-    Data: ${formatarData(aula.data)} às ${escapeHtml(aula.hora)}<br>
-    Local: ${escapeHtml(aula.local?.nome || "Não informado")}<br>
+    <strong>${escapeHtml(materiaNome(aula.materiaId))}</strong> - ${escapeHtml(aula.titulo || "")}<br>
+    Data: ${dataFmt} às ${escapeHtml(hora || "-")}<br>
+    Local: ${escapeHtml(localObj?.nome || "Não informado")}<br>
     <span style="color:var(--muted)">
       Ao enviar o relatório, ele ficará disponível para o coordenador.
     </span>
@@ -303,11 +383,11 @@ relatorioForm.addEventListener("submit", async (e) => {
   const reports = loadReports();
   reports.push({
     id: Date.now(),
-    aulaId: String(aulaSelecionadaParaRelatorio.id),
+    aulaId: String(aulaSelecionadaParaRelatorio._id),
     tutorId: localStorage.getItem("userId") || "",
     tutorNome: localStorage.getItem("nome") || "Tutor",
-    disciplina: aulaSelecionadaParaRelatorio.disciplina,
-    assunto: aulaSelecionadaParaRelatorio.assunto,
+    disciplina: materiaNome(aulaSelecionadaParaRelatorio.materiaId),
+    assunto: aulaSelecionadaParaRelatorio.titulo,
     createdAt: new Date().toISOString(),
     observacoes: obs.value.trim(),
     fileName: file.name,
@@ -317,11 +397,9 @@ relatorioForm.addEventListener("submit", async (e) => {
 
   alert("Relatório enviado! O coordenador poderá visualizar.");
   closeModal();
-
-  // FUTURO BACKEND:
-  // POST /relatorios (multipart) + atualizar status da aula como FINALIZADA
 });
 
 // init
 carregarLocalSelecionadoSeExistir();
-renderizar();
+carregarMaterias();       // ✅ importante
+carregarMinhasAulas();
