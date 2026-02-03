@@ -201,7 +201,7 @@ function renderizar() {
     const horaFmt = hora || "-";
 
     div.innerHTML = `
-      <strong>${escapeHtml(materiaNome(a.materiaId))}</strong> - ${escapeHtml(a.titulo || "")}<br>
+      <strong>${escapeHtml(a.materiaNome || a.materiaId || "Matéria")} </strong> - ${escapeHtml(a.titulo || "")}<br>
       Data: ${dataFmt} às ${escapeHtml(horaFmt)}<br>
       Local: ${escapeHtml(localNome)}<br>
 
@@ -222,7 +222,7 @@ function renderizar() {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const materiaId = (inputDisciplina.value || "").trim(); // ✅ agora vem do select
+  const materiaId = (inputDisciplina.value || "").trim(); // vem do select
   const titulo = inputAssunto.value.trim();
   const descricao = inputAssunto.value.trim();
   const data = inputData.value;
@@ -336,14 +336,14 @@ window.abrirRelatorio = function(aulaId){
   if (!aula) return;
 
   aulaSelecionadaParaRelatorio = aula;
-  modalTitle.textContent = `Relatório da Aula (#${aula._id})`;
+  modalTitle.textContent = `Relatório da Aula: ${escapeHtml(aula.titulo || "")}`;
 
   const { data, hora } = splitISO(aula.dataHora || "");
   const dataFmt = data ? formatarData(data) : "-";
   const localObj = parseLocalFromLocalId(aula.localId);
 
   modalInfo.innerHTML = `
-    <strong>${escapeHtml(materiaNome(aula.materiaId))}</strong> - ${escapeHtml(aula.titulo || "")}<br>
+    <strong>${escapeHtml(aula.materiaNome || aula.materiaId || "")}</strong> - ${escapeHtml(aula.titulo || "")}<br>
     Data: ${dataFmt} às ${escapeHtml(hora || "-")}<br>
     Local: ${escapeHtml(localObj?.nome || "Não informado")}<br>
     <span style="color:var(--muted)">

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AgendamentosController } from '../controllers/agendamentos.controller';
-import { authenticate } from '../middlewares/auth.middleware'; // ajuste o caminho
+import { authenticate } from '../middlewares/auth.middleware'; 
 
 const router = Router();
 const controller = new AgendamentosController();
@@ -13,6 +13,8 @@ router.get('/agendamentos/me', authenticate, (req, res) => controller.my(req as 
 router.get('/agendamentos/mine', authenticate, (req, res) => controller.mineTutor(req as any, res));
 router.put('/agendamentos/:id/confirm', authenticate, (req, res) => controller.confirm(req as any, res));
 router.put('/agendamentos/:id/reject', authenticate, (req, res) => controller.reject(req as any, res));
+router.delete('/agendamentos/:id', authenticate, (req, res) => controller.cancel(req as any, res));
+
 
 
 export default router;

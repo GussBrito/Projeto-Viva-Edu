@@ -123,11 +123,11 @@ function renderizar() {
     div.className = "list-card";
 
     div.innerHTML = `
-      <strong>${escapeHtml(materiaNome(aula.materiaId))}</strong><br>
+      <strong>${escapeHtml(aula.materiaNome || "Matéria")}</strong><br>
       Assunto: ${escapeHtml(aula.titulo || "")}<br>
-      TutorId: ${escapeHtml(aula.tutorId || "")}
+      Tutor: ${escapeHtml(aula.tutor?.nome || "Tutor")}
       <button class="btn btn-outline" type="button"
-        onclick="verPerfil('${encodeURIComponent(aula.tutorId || "")}')"
+        onclick="verPerfil('${encodeURIComponent(aula.tutor?.id || "")}')"
         style="margin-left:10px;">
         Ver perfil
       </button>
