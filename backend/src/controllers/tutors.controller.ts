@@ -57,7 +57,7 @@ export class TutorsController {
       const coordId = (req as any).user?.id;
       if (!coordId) return res.status(401).json({ error: 'Token inválido' });
 
-      const tutorId = req.params.id; // ✅ vem da rota /tutors/:id/validate
+      const tutorId = req.params.id; //vem da rota /tutors/:id/validate
       const { validado } = req.body;
 
       if (!tutorId) {

@@ -23,7 +23,7 @@ export class AgendamentosController {
     }
   }
 
-  // ✅ GET /agendamentos/me
+  // GET /agendamentos/me
   async my(req: AuthedRequest, res: Response) {
     try {
       const user = req.user;

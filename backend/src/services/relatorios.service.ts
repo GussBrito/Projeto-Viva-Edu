@@ -57,7 +57,7 @@ export class RelatoriosService {
     // recomendado: marca aula como FINALIZADA
     await this.aulas.updateById(aulaId, tutorId, { status: "FINALIZADA" } as any);
 
-    // ✅ Neo4j: cria nó Relatorio + liga Tutor -> Relatorio -> Aula
+    // Neo4j: cria nó Relatorio + liga Tutor -> Relatorio -> Aula
     try {
       const relatorioId = String((created as any)?._id || "").trim();
       const arquivoUrl = String((created as any)?.arquivoUrl || doc.arquivoUrl || "").trim();
