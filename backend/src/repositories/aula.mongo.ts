@@ -40,8 +40,8 @@ export class AulaMongoRepository {
 
     async listByTutor(tutorId: string) {
         return this.collection()
-            .find({ tutorId })
-            .sort({ createdAt: -1 } as any)
+            .find({ tutorId } as any) // sem filtro de status
+            .sort({ dataHora: 1 })    // opcional: ordena por data
             .toArray();
     }
 

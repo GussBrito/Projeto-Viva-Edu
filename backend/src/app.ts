@@ -8,6 +8,7 @@ import tutorsRoutes from './routes/tutors.routes';
 import materiasRoutes from './routes/materias.routes';
 import aulasRoutes from './routes/aulas.routes';
 import agendamentosRoutes from './routes/agendamentos.routes';
+import relatoriosRoutes from "./routes/relatorios.routes";
 
 const app = express();
 
@@ -26,6 +27,8 @@ app.use('/tutors', tutorsRoutes);
 app.use('/materias', materiasRoutes);
 app.use('/aulas', aulasRoutes);
 app.use(agendamentosRoutes);
+app.use(relatoriosRoutes);
+app.use(relatoriosRoutes);
 
 //servir arquivos (pra abrir no navegador)
 app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));

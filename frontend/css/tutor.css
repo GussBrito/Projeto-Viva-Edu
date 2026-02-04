@@ -1,0 +1,19 @@
+/* badges */
+.badge{
+  display:inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  border: 1px solid var(--border);
+}
+
+.badge.active{
+  background: rgba(0,140,60,.10);
+  color: #0a6b35;
+}
+
+.badge.inactive{
+  background: rgba(180,0,0,.08);
+  color: #a00000;
+}

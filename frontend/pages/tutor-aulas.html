@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
@@ -11,97 +12,117 @@
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/app.css">
   <link rel="stylesheet" href="../css/modal.css">
+  <link rel="stylesheet" href="../css/tutor.css">
 </head>
+
 <body>
 
-<header class="app-header">
-  <div class="container app-bar">
-    <div class="brand-left">
-      <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
-      <div>
-        <div class="brand-name">Minhas Aulas</div>
+  <header class="app-header">
+    <div class="container app-bar">
+      <div class="brand-left">
+        <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
+        <div>
+          <div class="brand-name">Minhas Aulas</div>
+        </div>
+      </div>
+
+      <nav class="app-nav">
+        <a href="tutor-home.html">Home</a>
+        <a href="tutor-agendamentos.html">Agendamentos</a>
+        <a href="tutor-materiais.html">Materiais</a>
+        <a href="tutor-chats.html">Chats</a>
+        <a href="perfil.html">Perfil</a>
+        <a href="sobre.html">Sobre</a>
+        <button id="logoutBtn" class="btn btn-outline" type="button">Sair</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page">
+    <div class="page-title">Minhas Aulas</div>
+
+    <!-- FORM AULA -->
+    <div class="list-card">
+      <h3 style="margin:0 0 10px;color:var(--brand);">Criar / Editar Aula</h3>
+
+      <form id="aulaForm">
+        <input type="hidden" id="aulaId">
+
+        <!-- ✅ antes era input text; agora é select puxando do backend -->
+        <select id="disciplina" required>
+          <option value="">Carregando disciplinas...</option>
+        </select>
+
+        <input type="text" id="assunto" placeholder="Assunto" required>
+        <input type="date" id="data" required>
+        <input type="time" id="hora" required>
+
+        <input type="hidden" id="localJson">
+        <input type="text" id="localNome" placeholder="Nenhum local selecionado" readonly>
+
+        <button class="btn btn-outline" type="button" id="btnSelecionarLocal">Selecionar local no mapa</button>
+        <button class="btn btn-primary" type="submit">Salvar Aula</button>
+        <button class="btn btn-outline" type="button" id="cancelarEdicao">Cancelar</button>
+
+        <div class="hint">* O local será escolhido no mapa (placeholder). Depois o back coloca Leaflet/PostGIS.</div>
+      </form>
+    </div>
+
+    <!-- FILTRO -->
+    <div class="list-card" style="margin-top:14px;">
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <label for="statusFilterAulas" style="font-weight:600;">Filtrar aulas:</label>
+
+        <select id="statusFilterAulas" style="max-width:260px;">
+          <option value="">Todas</option>
+          <option value="DISPONIVEL">Disponíveis</option>
+          <option value="FINALIZADA">Finalizadas</option>
+        </select>
       </div>
     </div>
 
-    <nav class="app-nav">
-      <a href="tutor-home.html">Home</a>
-      <a href="tutor-agendamentos.html">Agendamentos</a>
-      <a href="tutor-materiais.html">Materiais</a>
-      <a href="tutor-chats.html">Chats</a>
-      <a href="perfil.html">Perfil</a>
-      <a href="sobre.html">Sobre</a>
-      <button id="logoutBtn" class="btn btn-outline" type="button">Sair</button>
-    </nav>
-  </div>
-</header>
+    <div id="listaAulas"></div>
 
-<main class="container page">
-  <div class="page-title">Minhas Aulas</div>
 
-  <!-- FORM AULA -->
-  <div class="list-card">
-    <h3 style="margin:0 0 10px;color:var(--brand);">Criar / Editar Aula</h3>
+    <div id="listaAulas"></div>
+  </main>
 
-    <form id="aulaForm">
-      <input type="hidden" id="aulaId">
+  <!-- MODAL RELATÓRIO -->
+  <div class="modal-backdrop" id="modalRelatorio">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3 id="modalTitle">Relatório da Aula</h3>
+        <button class="btn btn-outline" type="button" id="btnFecharModal">Fechar</button>
+      </div>
 
-      <!-- ✅ antes era input text; agora é select puxando do backend -->
-      <select id="disciplina" required>
-        <option value="">Carregando disciplinas...</option>
-      </select>
+      <div class="list-card" id="modalInfoAula"></div>
 
-      <input type="text" id="assunto" placeholder="Assunto" required>
-      <input type="date" id="data" required>
-      <input type="time" id="hora" required>
+      <form id="relatorioForm" class="list-card">
+        <textarea id="observacoes" rows="4" placeholder="Observações sobre a aula (opcional)"></textarea>
 
-      <input type="hidden" id="localJson">
-      <input type="text" id="localNome" placeholder="Nenhum local selecionado" readonly>
+        <div style="margin-top:10px;">
+          <input type="file" id="arquivoRelatorio" required>
+          <div class="hint">* Anexe um arquivo com o relatório da aula (PDF, JPEG, etc.)</div>
+        </div>
 
-      <button class="btn btn-outline" type="button" id="btnSelecionarLocal">Selecionar local no mapa</button>
-      <button class="btn btn-primary" type="submit">Salvar Aula</button>
-      <button class="btn btn-outline" type="button" id="cancelarEdicao">Cancelar</button>
-
-      <div class="hint">* O local será escolhido no mapa (placeholder). Depois o back coloca Leaflet/PostGIS.</div>
-    </form>
-  </div>
-
-  <div id="listaAulas"></div>
-</main>
-
-<!-- MODAL RELATÓRIO -->
-<div class="modal-backdrop" id="modalRelatorio">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modal-header">
-      <h3 id="modalTitle">Relatório da Aula</h3>
-      <button class="btn btn-outline" type="button" id="btnFecharModal">Fechar</button>
+        <div class="modal-actions">
+          <button class="btn btn-primary" type="submit">Enviar Relatório</button>
+          <button class="btn btn-outline" type="button" id="btnCancelarRelatorio">Cancelar</button>
+        </div>
+      </form>
     </div>
-
-    <div class="list-card" id="modalInfoAula"></div>
-
-    <form id="relatorioForm" class="list-card">
-      <textarea id="observacoes" rows="4" placeholder="Observações sobre a aula (opcional)"></textarea>
-
-      <div style="margin-top:10px;">
-        <input type="file" id="arquivoRelatorio" required>
-        <div class="hint">* No back vira upload real e fica disponível para o coordenador.</div>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn btn-primary" type="submit">Enviar Relatório</button>
-        <button class="btn btn-outline" type="button" id="btnCancelarRelatorio">Cancelar</button>
-      </div>
-    </form>
   </div>
-</div>
 
-<footer class="footer">
-  <p>© 2026 – VivaEdu</p>
-  <p>Projeto acadêmico desenvolvido para fins educacionais. Não possui finalidade comercial.</p>
-  <p>Desenvolvido por <strong>Luiz Gustavo Brito</strong>, <strong>Vanessa Beatriz</strong> e <strong>Samuel Marcos Souza</strong></p>
-</footer>
+  <footer class="footer">
+    <p>© 2026 – VivaEdu</p>
+    <p>Projeto acadêmico desenvolvido para fins educacionais. Não possui finalidade comercial.</p>
+    <p>Desenvolvido por <strong>Luiz Gustavo Brito</strong>, <strong>Vanessa Beatriz</strong> e <strong>Samuel Marcos
+        Souza</strong></p>
+  </footer>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/tutor-aulas.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/tutor-aulas.js"></script>
 </body>
+
 </html>
