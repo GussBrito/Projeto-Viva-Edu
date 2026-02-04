@@ -125,6 +125,14 @@ function renderizar() {
     div.innerHTML = `
       <strong>${escapeHtml(aula.materiaNome || "Matéria")}</strong><br>
       Assunto: ${escapeHtml(aula.titulo || "")}<br>
+                Data: ${dataFmt} às ${escapeHtml(horaFmt)}<br>
+          Local: ${escapeHtml(localNome)}
+              <button class="btn btn-outline" type="button"
+                style="margin-left:8px;"
+                onclick="verNoMapa('${encodeURIComponent(a.localId || "")}')">
+                Ver no mapa
+              </button>
+              <br>
       Tutor: ${escapeHtml(aula.tutor?.nome || "Tutor")}
       <button class="btn btn-outline" type="button"
         onclick="verPerfil('${encodeURIComponent(aula.tutor?.id || "")}')"
