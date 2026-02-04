@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
@@ -10,58 +11,65 @@
 
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 </head>
+
 <body>
 
-<header class="app-header">
-  <div class="container app-bar">
-    <div class="brand-left">
-      <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
-      <div>
-       
-        <div class="brand-name">Selecionar Local (Mapa)</div>
+  <header class="app-header">
+    <div class="container app-bar">
+      <div class="brand-left">
+        <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
+        <div>
+
+          <div class="brand-name">Selecionar Local (Mapa)</div>
+        </div>
       </div>
+
+      <nav class="app-nav">
+        <a href="tutor-aulas.html">Voltar</a>
+        <button id="logoutBtn" class="btn btn-outline" type="button">Sair</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page">
+    <div class="page-title">Selecionar Local</div>
+
+    <div class="list-card">
+      <strong>Observação:</strong>
+      <p style="margin-top:8px;">
+        Aqui depois entra o Leaflet + Nominatim + PostGIS. Por enquanto é um placeholder para estruturar o fluxo.
+      </p>
     </div>
 
-    <nav class="app-nav">
-      <a href="tutor-aulas.html">Voltar</a>
-      <button id="logoutBtn" class="btn btn-outline" type="button">Sair</button>
-    </nav>
-  </div>
-</header>
+    <div class="list-card">
+      <h3 style="margin:0 0 10px;color:var(--brand);">Cadastrar local (simulação)</h3>
 
-<main class="container page">
-  <div class="page-title">Selecionar Local</div>
+      <form id="localForm">
+        <input type="text" id="nome" placeholder="Nome do local" required>
+        <input type="text" id="lat" placeholder="Latitude" required>
+        <input type="text" id="lng" placeholder="Longitude" required>
 
-  <div class="list-card">
-    <strong>Observação:</strong>
-    <p style="margin-top:8px;">
-      Aqui depois entra o Leaflet + Nominatim + PostGIS. Por enquanto é um placeholder para estruturar o fluxo.
-    </p>
-  </div>
+        <button class="btn btn-outline" type="button" id="btnGeo">Usar minha localização</button>
+        <button class="btn btn-primary" type="submit">Salvar e Selecionar</button>
+      </form>
+    </div>
+  </main>
 
-  <div class="list-card">
-    <h3 style="margin:0 0 10px;color:var(--brand);">Cadastrar local (simulação)</h3>
+  <footer class="footer">
+    <p>© 2026 – VivaEdu</p>
+    <p>Projeto acadêmico desenvolvido para fins educacionais. Não possui finalidade comercial.</p>
+    <p>Desenvolvido por <strong>Luiz Gustavo Brito</strong>, <strong>Vanessa Beatriz</strong> e <strong>Samuel Marcos
+        Souza</strong></p>
+  </footer>
 
-    <form id="localForm">
-      <input type="text" id="nome" placeholder="Nome do local" required>
-      <input type="text" id="lat" placeholder="Latitude" required>
-      <input type="text" id="lng" placeholder="Longitude" required>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/tutor-local-picker.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-      <button class="btn btn-outline" type="button" id="btnGeo">Usar minha localização</button>
-      <button class="btn btn-primary" type="submit">Salvar e Selecionar</button>
-    </form>
-  </div>
-</main>
-
-<footer class="footer">
-  <p>© 2026 – VivaEdu</p>
-  <p>Projeto acadêmico desenvolvido para fins educacionais. Não possui finalidade comercial.</p>
-  <p>Desenvolvido por <strong>Luiz Gustavo Brito</strong>, <strong>Vanessa Beatriz</strong> e <strong>Samuel Marcos Souza</strong></p>
-</footer>
-
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/tutor-local-picker.js"></script>
 </body>
+
 </html>

@@ -44,10 +44,10 @@ export class AuthService {
       createdAt: new Date()
     };
 
-    // 1) salva no Mongo
+    // salva no Mongo
     const created = await this.userRepo.create(userToCreate);
 
-    // 2) salva o nó no Neo4j (mínimo: id, nome, role)
+    // salva o nó no Neo4j (mínimo: id, nome, role)
     await this.userGraph.createUserNode(
       created._id!, // idMongo
       created.nome,

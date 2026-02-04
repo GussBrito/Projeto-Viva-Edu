@@ -12,7 +12,7 @@ export class RelatorioMongoRepository {
   async create(doc: Relatorio) {
     const result = await this.collection().insertOne(doc as any);
 
-    // ✅ retorna o documento com _id (string) para o service usar no Neo4j
+    // retorna o documento com _id (string) para o service usar no Neo4j
     return { ...doc, _id: result.insertedId.toString() } as any;
   }
 
