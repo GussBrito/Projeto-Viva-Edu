@@ -23,7 +23,14 @@ const mapEl = document.getElementById("map");
 let map = null;
 let marker = null;
 
-function setLatLng(lat, lng, options = { pan: true }) {
+function toNumber(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function setLatLng(lat, lng, options = { pan: true, zoom: 16 }) {
+  if (!inputLat || !inputLng) return;
+
   inputLat.value = String(lat);
   inputLng.value = String(lng);
 
@@ -37,17 +44,18 @@ function setLatLng(lat, lng, options = { pan: true }) {
     marker.setLatLng(ll);
   }
 
-  if (options.pan) map.setView(ll, Math.max(map.getZoom(), 16));
+  if (options.pan) map.setView(ll, options.zoom || 16);
 }
 
 function initMap() {
   if (!mapEl || typeof L === "undefined") return;
 
- // centro inicial do mapa
-  const lat0 = -6.8896;   // Cajazeiras - PB
+  // fallback Cajazeiras - PB
+  const lat0 = -6.8896;
   const lng0 = -38.5616;
 
-  map = L.map("map").setView([lat0, lng0], 5);
+  // zoom inicial melhor
+  map = L.map("map").setView([lat0, lng0], 13);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
@@ -57,18 +65,21 @@ function initMap() {
   // clique no mapa => pega lat/lng
   map.on("click", (e) => {
     const { lat, lng } = e.latlng;
-    setLatLng(lat, lng);
+    setLatLng(lat, lng, { pan: true, zoom: 16 });
   });
 
-  // se já tinha local salvo, pré-carrega
+  // se já tinha local salvo, pré-carrega (aceita string/number)
   const raw = localStorage.getItem("selected_local");
   if (raw) {
     try {
       const loc = JSON.parse(raw);
-      if (typeof loc.latitude === "number" && typeof loc.longitude === "number") {
-        if (inputNome && !inputNome.value) inputNome.value = loc.nome || "";
-        setLatLng(loc.latitude, loc.longitude, { pan: false });
-        map.setView([loc.latitude, loc.longitude], 16);
+
+      const lat = toNumber(loc?.latitude);
+      const lng = toNumber(loc?.longitude);
+
+      if (lat !== null && lng !== null) {
+        if (inputNome && !inputNome.value) inputNome.value = loc?.nome || "";
+        setLatLng(lat, lng, { pan: true, zoom: 16 });
       }
     } catch { }
   }
@@ -84,7 +95,7 @@ btnGeo?.addEventListener("click", () => {
     (pos) => {
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
-      setLatLng(lat, lng);
+      setLatLng(lat, lng, { pan: true, zoom: 16 });
       alert("Localização capturada! (Você pode clicar no mapa para ajustar.)");
     },
     () => alert("Não foi possível obter localização. Permita o acesso e tente novamente.")
@@ -96,15 +107,15 @@ form?.addEventListener("submit", (e) => {
   e.preventDefault();
 
   const nome = (inputNome?.value || "").trim();
-  const latitude = Number(inputLat?.value);
-  const longitude = Number(inputLng?.value);
+  const latitude = toNumber(inputLat?.value);
+  const longitude = toNumber(inputLng?.value);
 
-  if (!nome || Number.isNaN(latitude) || Number.isNaN(longitude)) {
-    alert("Preencha nome, latitude e longitude corretamente (ou clique no mapa).");
+  if (!nome || latitude === null || longitude === null) {
+    alert("Preencha o nome e selecione um ponto no mapa (ou use sua localização).");
     return;
   }
 
-  // ✅ GeoJSON (Point) + campos antigos pra não quebrar nada
+  // GeoJSON (Point) + campos antigos (pra não quebrar nada no sistema)
   const local = {
     nome,
     latitude,

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa do Local</title>
+
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    #map { height: 70vh; border-radius: 14px; border: 1px solid var(--border); }
+  </style>
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="container app-bar">
+      <div class="brand-left">
+        <img src="../src/icons/logo-vivaedu.png" alt="VivaEdu">
+        <div class="brand-name">Mapa do Local</div>
+      </div>
+
+      <nav class="app-nav">
+        <button class="btn btn-outline" type="button" onclick="history.back()">Voltar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page">
+    <div class="list-card">
+      <div id="map"></div>
+      <div id="info" style="margin-top:10px;color:var(--muted);font-weight:800;"></div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../js/mapa-view.js"></script>
+</body>
+</html>

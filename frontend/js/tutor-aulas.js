@@ -271,7 +271,13 @@ function renderizar() {
 
         <div style="margin-top:6px;">
           Data: ${dataFmt} às ${escapeHtml(horaFmt)}<br>
-          Local: ${escapeHtml(localNome)}<br>
+          Local: ${escapeHtml(localNome)}
+              <button class="btn btn-outline" type="button"
+                style="margin-left:8px;"
+                onclick="verNoMapa('${encodeURIComponent(a.localId || "")}')">
+                Ver no mapa
+              </button>
+              <br>
         </div>
 
       ${alunosHtml}
@@ -379,6 +385,15 @@ function limparForm() {
   inputLocalJson.value = "";
   inputLocalNome.value = "Nenhum local selecionado";
 }
+
+window.verNoMapa = function (localIdEnc) {
+  const localId = decodeURIComponent(localIdEnc || "");
+  if (!localId) return alert("Sem local cadastrado nesta aula.");
+
+  // localId já é JSON string, então passamos como querystring
+  window.location.href = `mapa-view.html?local=${encodeURIComponent(localId)}`;
+};
+
 
 // ===== PERFIL PÚBLICO =====
 window.verPerfil = function (userId) {
