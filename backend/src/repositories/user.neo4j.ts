@@ -138,17 +138,20 @@ export class UserNeo4jRepository {
   async createRelatorioNode(relatorioId: string, arquivoUrl: string, createdAtISO?: string) {
     return this.run(
       `
-      MERGE (r:Relatorio { idMongo: $relatorioId })
-      SET r.arquivoUrl = $arquivoUrl,
-          r.updatedAt = datetime()
-      ON CREATE SET r.createdAt = CASE
+    MERGE (r:Relatorio { idMongo: $relatorioId })
+    ON CREATE SET
+      r.createdAt = CASE
         WHEN $createdAtISO IS NULL THEN datetime()
         ELSE datetime($createdAtISO)
       END
-      `,
+    SET
+      r.arquivoUrl = $arquivoUrl,
+      r.updatedAt = datetime()
+    `,
       { relatorioId, arquivoUrl, createdAtISO: createdAtISO || null }
     );
   }
+
 
   // Tutor -> GERA_RELATORIO -> Relatorio
   async linkTutorGeraRelatorio(tutorId: string, relatorioId: string) {

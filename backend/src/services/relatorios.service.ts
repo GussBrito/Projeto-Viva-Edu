@@ -58,22 +58,22 @@ export class RelatoriosService {
     await this.aulas.updateById(aulaId, tutorId, { status: "FINALIZADA" } as any);
 
     // ✅ Neo4j: cria nó Relatorio + liga Tutor -> Relatorio -> Aula
-    // pressupõe que (:Aula {idMongo:aulaId}) já existe
     try {
-      if ((created as any)?._id && (created as any).arquivoUrl) {
-        const relatorioId = String((created as any)._id);
-        const arquivoUrl = String((created as any).arquivoUrl);
+      const relatorioId = String((created as any)?._id || "").trim();
+      const arquivoUrl = String((created as any)?.arquivoUrl || doc.arquivoUrl || "").trim();
 
-        const createdAtISO =
-          (created as any).createdAt ? new Date((created as any).createdAt).toISOString() : undefined;
+      if (!relatorioId || !arquivoUrl) {
+        console.warn("[Neo4j] pulou relatório: faltou relatorioId/arquivoUrl", { relatorioId, arquivoUrl });
+      } else {
+        const createdAtRaw = (created as any)?.createdAt || doc.createdAt;
+        const createdAtISO = new Date(createdAtRaw).toISOString();
 
         await this.graph.createRelatorioNode(relatorioId, arquivoUrl, createdAtISO);
         await this.graph.linkTutorGeraRelatorio(tutorId, relatorioId);
         await this.graph.linkRelatorioDaAula(relatorioId, aulaId);
       }
-    } catch (e) {
-      // se Neo4j falhar, não impede o fluxo principal (Mongo já salvou)
-      console.warn("Neo4j (relatorio) falhou:", (e as any)?.message || e);
+    } catch (e: any) {
+      console.warn("[Neo4j] falhou relatório:", e?.message || e);
     }
 
     return created;
@@ -83,29 +83,10 @@ export class RelatoriosService {
     return this.relRepo.findByAulaId(aulaId);
   }
 
-  /**
-   * ✅ LISTAR RELATÓRIOS (COORDENADOR)
-   * Retorna "limpo" pro front:
-   * _id, aulaId, materiaNome, tituloAula, tutorNome, createdAt, arquivoUrl
-   */
   async listAllForCoordenador(): Promise<RelatorioListView[]> {
-    // tenta listAll() e depois fallback findAll()
-    let relatorios: any[] = [];
+    const relatorios = await this.relRepo.listAll();
 
-    const anyRepo = this.relRepo as any;
-
-    if (typeof anyRepo.listAll === "function") {
-      const r = await anyRepo.listAll();
-      relatorios = Array.isArray(r) ? r : [];
-    } else if (typeof anyRepo.findAll === "function") {
-      const r = await anyRepo.findAll();
-      relatorios = Array.isArray(r) ? r : [];
-    } else {
-      // se não existir nenhum, avisa claramente (melhor do que "undefined is not a function")
-      throw new Error("RelatorioMongoRepository precisa ter listAll() ou findAll()");
-    }
-
-    const aulaIds = [...new Set(relatorios.map(r => r.aulaId).filter(Boolean))];
+    const aulaIds = [...new Set(relatorios.map((r: any) => r.aulaId).filter(Boolean))];
 
     // busca aulas em lote (se existir findByIds), senão faz findById em paralelo
     let aulas: any[] = [];
@@ -121,7 +102,7 @@ export class RelatoriosService {
 
     const aulaMap = new Map(aulas.map(a => [String(a._id), a]));
 
-    const tutorIds = [...new Set(relatorios.map(r => r.tutorId).filter(Boolean))];
+    const tutorIds = [...new Set(relatorios.map((r: any) => r.tutorId).filter(Boolean))];
     const materiaIds = [...new Set(aulas.map(a => a.materiaId).filter(Boolean))];
 
     const [tutores, materias] = await Promise.all([
@@ -132,14 +113,13 @@ export class RelatoriosService {
     const tutorMap = new Map((tutores || []).map((t: any) => [String(t._id), t.nome]));
     const materiaMap = new Map((materias || []).map((m: any) => [String(m._id), m.nome]));
 
-    return relatorios.map((r: any) => {
+    return (relatorios || []).map((r: any) => {
       const aula = aulaMap.get(String(r.aulaId));
 
       const tituloAula = aula?.titulo || "[Aula removida]";
       const materiaNome = aula ? (materiaMap.get(String(aula.materiaId)) || "Matéria") : "";
       const tutorNome = tutorMap.get(String(r.tutorId)) || "Tutor";
 
-      // arquivoUrl (prioriza o que já está no banco)
       let arquivoUrl = String(r.arquivoUrl || "").trim();
 
       if (!arquivoUrl && r.arquivoNome) {
