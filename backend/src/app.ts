@@ -9,6 +9,7 @@ import materiasRoutes from './routes/materias.routes';
 import aulasRoutes from './routes/aulas.routes';
 import agendamentosRoutes from './routes/agendamentos.routes';
 import relatoriosRoutes from "./routes/relatorios.routes";
+import coordenadorRoutes from "./routes/coordenador.routes";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use('/aulas', aulasRoutes);
 app.use(agendamentosRoutes);
 app.use(relatoriosRoutes);
 app.use(relatoriosRoutes);
+app.use(coordenadorRoutes);
 
 //servir arquivos (pra abrir no navegador)
 app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));

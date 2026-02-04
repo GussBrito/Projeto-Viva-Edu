@@ -33,6 +33,16 @@ export class UserMongoRepository {
       .toArray();
   }
 
+  // listar por role (COORDENADOR usa pra ALUNO/TUTOR)
+  async findByRole(role: UserRole) {
+    const users = await this.collection()
+      .find({ role } as any, { projection: { senha: 0 } as any })
+      .sort({ createdAt: -1 } as any)
+      .toArray();
+
+    return users.map(u => ({ ...u, _id: String((u as any)._id) }));
+  }
+
   async create(user: User) {
     const result = await this.collection().insertOne(user);
     return { ...user, _id: result.insertedId.toString() };
@@ -71,7 +81,6 @@ export class UserMongoRepository {
 
   // ===== tutor flow (perfil + docs + validação) =====
 
-  // Atualiza campos do perfil do tutor (sem permitir mexer em role/ativo/etc)
   async updateTutorProfile(
     id: string,
     patch: Pick<User, 'areaAtuacao' | 'formacao' | 'situacaoCurso'>
@@ -87,7 +96,6 @@ export class UserMongoRepository {
     return result.matchedCount === 1;
   }
 
-  // Salva caminhos/URLs dos documentos
   async setTutorDocs(id: string, docs: TutorDocs) {
     const oid = this.toObjectId(id);
     if (!oid) return false;
@@ -100,7 +108,6 @@ export class UserMongoRepository {
     return result.matchedCount === 1;
   }
 
-  // Lista tutores pendentes (para o coordenador validar)
   async findPendingTutors() {
     return this.collection()
       .find(
@@ -110,7 +117,6 @@ export class UserMongoRepository {
       .toArray();
   }
 
-  // Coordenador valida/reprova tutor
   async setTutorValidation(id: string, validado: boolean) {
     const oid = this.toObjectId(id);
     if (!oid) return false;
@@ -128,7 +134,6 @@ export class UserMongoRepository {
     return result.matchedCount === 1;
   }
 
-  // Buscar vários usuários públicos por IDs (sem senha)
   async findPublicByIds(ids: string[]) {
     const objectIds = ids
       .filter(Boolean)
@@ -141,7 +146,6 @@ export class UserMongoRepository {
       )
       .toArray();
 
-    // garante _id string
     return users.map(u => ({ ...u, _id: String((u as any)._id) }));
   }
 }
