@@ -12,6 +12,9 @@ document.getElementById("logoutBtn").addEventListener("click", () => logout());
 const form = document.getElementById("aulaForm");
 const lista = document.getElementById("listaAulas");
 
+// ✅ NOVO: filtro de status (você vai criar no HTML)
+const statusFilterAulas = document.getElementById("statusFilterAulas");
+
 const inputId = document.getElementById("aulaId");
 const inputDisciplina = document.getElementById("disciplina"); // ✅ agora é SELECT de materias
 const inputAssunto = document.getElementById("assunto");
@@ -24,7 +27,7 @@ const inputLocalNome = document.getElementById("localNome");
 const btnSelecionarLocal = document.getElementById("btnSelecionarLocal");
 const btnCancelar = document.getElementById("cancelarEdicao");
 
-// MODAL RELATÓRIO (mantém mock por enquanto)
+// MODAL RELATÓRIO (agora integra no backend)
 const modal = document.getElementById("modalRelatorio");
 const modalInfo = document.getElementById("modalInfoAula");
 const modalTitle = document.getElementById("modalTitle");
@@ -60,7 +63,8 @@ function carregarLocalSelecionadoSeExistir() {
 
 // ===== UTIL =====
 function formatarData(dataISO) {
-  const [ano, mes, dia] = dataISO.split("-");
+  const [ano, mes, dia] = (dataISO || "").split("-");
+  if (!ano) return "-";
   return `${dia}/${mes}/${ano}`;
 }
 
@@ -71,6 +75,22 @@ function escapeHtml(str) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+// ✅ label amigável pro status no card
+function statusLabelAula(status) {
+  const s = String(status || "").toUpperCase().trim();
+  if (s === "DISPONIVEL") return "Disponível";
+  if (s === "FINALIZADA") return "Finalizada";
+  if (s === "CANCELADA") return "Cancelada";
+  return s || "Disponível";
+}
+
+// ✅ usa o badge do admin: .badge.active e .badge.inactive
+function statusBadgeClassAula(statusRaw) {
+  const s = String(statusRaw || "").toUpperCase().trim();
+  if (s === "DISPONIVEL") return "badge active";
+  return "badge inactive";
 }
 
 // junta data + hora em ISO
@@ -156,19 +176,48 @@ async function removerAula(id) {
   return api(`/aulas/${id}`, { method: "DELETE" });
 }
 
+/**
+ * ✅ RELATÓRIO (UPLOAD MULTIPART NO BACKEND)
+ * POST /aulas/:id/relatorio
+ * FormData: observacoes + arquivo
+ */
+async function uploadRelatorioAula(aulaId, observacoes, file) {
+  const fd = new FormData();
+  fd.append("observacoes", observacoes || "");
+  fd.append("arquivo", file); // <- se seu multer não for "arquivo", troque aqui
+
+  const res = await fetch(`http://localhost:3000/aulas/${encodeURIComponent(aulaId)}/relatorio`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    },
+    body: fd
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || data.message || "Erro ao enviar relatório.");
+  return data;
+}
+
 // ===== RENDER =====
 function renderizar() {
   lista.innerHTML = "";
 
-  if (aulas.length === 0) {
+  // ✅ aplica filtro por status
+  const filtroStatus = (statusFilterAulas?.value || "").toUpperCase().trim();
+  const aulasFiltradas = !filtroStatus
+    ? aulas
+    : aulas.filter(a => String(a.status || "DISPONIVEL").toUpperCase().trim() === filtroStatus);
+
+  if (aulasFiltradas.length === 0) {
     const empty = document.createElement("div");
     empty.className = "list-card";
-    empty.innerHTML = `<p style="color:var(--muted);margin:0;">Nenhuma aula cadastrada.</p>`;
+    empty.innerHTML = `<p style="color:var(--muted);margin:0;">Nenhuma aula encontrada para esse filtro.</p>`;
     lista.appendChild(empty);
     return;
   }
 
-  aulas.forEach(a => {
+  aulasFiltradas.forEach(a => {
     const div = document.createElement("div");
     div.className = "list-card";
 
@@ -200,17 +249,40 @@ function renderizar() {
     const dataFmt = data ? formatarData(data) : "-";
     const horaFmt = hora || "-";
 
+    const statusRaw = String(a.status || "DISPONIVEL").toUpperCase().trim();
+    const statusTxt = statusLabelAula(statusRaw);
+    const badgeClass = statusBadgeClassAula(statusRaw);
+
+    // ✅ desabilita relatório se já finalizou (ou não está disponível)
+    const podeRelatorio = statusRaw === "DISPONIVEL";
+    const relatorioDisabledAttr = podeRelatorio ? "" : "disabled";
+    const relatorioTexto = statusRaw === "FINALIZADA" ? "Relatório enviado" : "Finalizar / Relatório";
+
+    // ✅ esconde só o botão "Editar" quando FINALIZADA (mantém Excluir)
+    const mostrarEditar = statusRaw !== "FINALIZADA";
+
     div.innerHTML = `
-      <strong>${escapeHtml(a.materiaNome || a.materiaId || "Matéria")} </strong> - ${escapeHtml(a.titulo || "")}<br>
-      Data: ${dataFmt} às ${escapeHtml(horaFmt)}<br>
-      Local: ${escapeHtml(localNome)}<br>
+      <div>
+          <strong>
+            ${escapeHtml(a.materiaNome || a.materiaId || "Matéria")} - ${escapeHtml(a.titulo || "")}
+          </strong>
+          <br>
+          <span class="${badgeClass}">${escapeHtml(statusTxt)}</span>
+        </div>
+
+        <div style="margin-top:6px;">
+          Data: ${dataFmt} às ${escapeHtml(horaFmt)}<br>
+          Local: ${escapeHtml(localNome)}<br>
+        </div>
 
       ${alunosHtml}
 
       <div style="margin-top:12px;">
-        <button class="btn btn-outline" type="button" onclick="editarAula('${a._id}')">Editar</button>
+        ${mostrarEditar ? `<button class="btn btn-outline" type="button" onclick="editarAula('${a._id}')">Editar</button>` : ""}
         <button class="btn btn-outline" type="button" onclick="excluirAula('${a._id}')">Excluir</button>
-        <button class="btn btn-primary" type="button" onclick="abrirRelatorio('${a._id}')">Finalizar / Relatório</button>
+        <button class="btn btn-primary" type="button" onclick="abrirRelatorio('${a._id}')" ${relatorioDisabledAttr}>
+          ${escapeHtml(relatorioTexto)}
+        </button>
       </div>
     `;
 
@@ -222,7 +294,7 @@ function renderizar() {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const materiaId = (inputDisciplina.value || "").trim(); // vem do select
+  const materiaId = (inputDisciplina.value || "").trim();
   const titulo = inputAssunto.value.trim();
   const descricao = inputAssunto.value.trim();
   const data = inputData.value;
@@ -268,7 +340,6 @@ window.editarAula = function (id) {
   if (!aula) return;
 
   inputId.value = aula._id;
-
   inputDisciplina.value = aula.materiaId || "";
   inputAssunto.value = aula.titulo || "";
 
@@ -315,7 +386,7 @@ window.verPerfil = function (userId) {
   window.location.href = `perfil-publico.html?id=${encodeURIComponent(userId)}`;
 };
 
-// ===== MODAL RELATÓRIO (continua mock por enquanto) =====
+// ===== MODAL RELATÓRIO =====
 function openModal() { modal.classList.add("open"); }
 function closeModal() {
   modal.classList.remove("open");
@@ -334,6 +405,11 @@ modal.addEventListener("click", (e) => {
 window.abrirRelatorio = function (aulaId) {
   const aula = aulas.find(a => a._id === aulaId);
   if (!aula) return;
+
+  const statusRaw = String(aula.status || "DISPONIVEL").toUpperCase().trim();
+  if (statusRaw !== "DISPONIVEL") {
+    return alert("Essa aula já foi finalizada (ou não está disponível para relatório).");
+  }
 
   aulaSelecionadaParaRelatorio = aula;
   modalTitle.textContent = `Relatório da Aula: ${escapeHtml(aula.titulo || "")}`;
@@ -354,23 +430,7 @@ window.abrirRelatorio = function (aulaId) {
   openModal();
 };
 
-function readAsDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-function loadReports() {
-  try { return JSON.parse(localStorage.getItem("reports") || "[]"); }
-  catch { return []; }
-}
-function saveReports(arr) {
-  localStorage.setItem("reports", JSON.stringify(arr));
-}
-
+// ✅ SUBMIT REAL (BACKEND)
 relatorioForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!aulaSelecionadaParaRelatorio) return alert("Nenhuma aula selecionada.");
@@ -378,28 +438,29 @@ relatorioForm.addEventListener("submit", async (e) => {
   const file = fileInput.files[0];
   if (!file) return alert("Selecione um arquivo do relatório.");
 
-  const dataUrl = await readAsDataURL(file);
+  try {
+    await uploadRelatorioAula(
+      aulaSelecionadaParaRelatorio._id,
+      obs.value.trim(),
+      file
+    );
 
-  const reports = loadReports();
-  reports.push({
-    id: Date.now(),
-    aulaId: String(aulaSelecionadaParaRelatorio._id),
-    tutorId: localStorage.getItem("userId") || "",
-    tutorNome: localStorage.getItem("nome") || "Tutor",
-    disciplina: materiaNome(aulaSelecionadaParaRelatorio.materiaId),
-    assunto: aulaSelecionadaParaRelatorio.titulo,
-    createdAt: new Date().toISOString(),
-    observacoes: obs.value.trim(),
-    fileName: file.name,
-    fileDataUrl: dataUrl
-  });
-  saveReports(reports);
+    alert("Relatório enviado com sucesso!");
+    closeModal();
 
-  alert("Relatório enviado! O coordenador poderá visualizar.");
-  closeModal();
+    await carregarMinhasAulas();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "Erro ao enviar relatório.");
+  }
 });
+
+// ✅ ao trocar filtro, só re-renderiza
+if (statusFilterAulas) {
+  statusFilterAulas.addEventListener("change", renderizar);
+}
 
 // init
 carregarLocalSelecionadoSeExistir();
-carregarMaterias();       // ✅ importante
+carregarMaterias();
 carregarMinhasAulas();
