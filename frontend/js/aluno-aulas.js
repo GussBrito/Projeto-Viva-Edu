@@ -16,11 +16,28 @@ let materiaSelecionada = ""; // "" = todas
 
 function escapeHtml(str) {
   return String(str || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function formatDateTimeBR(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  // data e hora PT-BR
+  return d.toLocaleString("pt-BR");
+}
+
+function parseLocalFromLocalId(localId) {
+  if (!localId) return null;
+  try {
+    return JSON.parse(localId); // você salva localId como JSON string
+  } catch {
+    return null;
+  }
 }
 
 // ===== UI: filtro de matérias (criado via JS) =====
@@ -91,7 +108,7 @@ function materiaNome(materiaId) {
 // ===== carregar aulas =====
 async function carregarAulas() {
   try {
-    const data = await api("/aulas");
+    const data = await api("/aulas"); // aqui deve vir dataHora + localId
     aulas = Array.isArray(data) ? data : [];
     renderizar();
   } catch (err) {
@@ -122,36 +139,54 @@ function renderizar() {
     const div = document.createElement("div");
     div.className = "list-card";
 
-    div.innerHTML = `
-      <strong>${escapeHtml(aula.materiaNome || "Matéria")}</strong><br>
-      Assunto: ${escapeHtml(aula.titulo || "")}<br>
-                Data: ${dataFmt} às ${escapeHtml(horaFmt)}<br>
-          Local: ${escapeHtml(localNome)}
-              <button class="btn btn-outline" type="button"
-                style="margin-left:8px;"
-                onclick="verNoMapa('${encodeURIComponent(a.localId || "")}')">
-                Ver no mapa
-              </button>
-              <br>
-      Tutor: ${escapeHtml(aula.tutor?.nome || "Tutor")}
-      <button class="btn btn-outline" type="button"
-        onclick="verPerfil('${encodeURIComponent(aula.tutor?.id || "")}')"
-        style="margin-left:10px;">
-        Ver perfil
-      </button>
-      <br><br>
+    const dt = formatDateTimeBR(aula.dataHora);
+    const localObj = parseLocalFromLocalId(aula.localId);
+    const localNome = localObj?.nome || "Não informado";
 
-      <button class="btn btn-primary" type="button" onclick="agendarAula('${aula._id}')">
-        Agendar
-      </button>
+    div.innerHTML = `
+      <strong>${escapeHtml(aula.materiaNome || materiaNome(aula.materiaId) || "Matéria")}</strong><br>
+      Assunto: ${escapeHtml(aula.titulo || "")}<br>
+
+      <div style="margin-top:6px;">
+        <strong>Data/Hora:</strong> ${escapeHtml(dt)}<br>
+        <strong>Local:</strong> ${escapeHtml(localNome)}
+        <button class="btn btn-outline" type="button"
+          onclick="verNoMapa('${encodeURIComponent(aula.localId || "")}')"
+          style="margin-left:10px;">
+          Ver no mapa
+        </button>
+      </div>
+
+      <div style="margin-top:10px;">
+        <strong>Tutor:</strong> ${escapeHtml(aula.tutor?.nome || "Tutor")}
+        <button class="btn btn-outline" type="button"
+          onclick="verPerfil('${encodeURIComponent(aula.tutor?.id || "")}')"
+          style="margin-left:10px;">
+          Ver perfil
+        </button>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button class="btn btn-primary" type="button" onclick="agendarAula('${escapeHtml(aula._id)}')">
+          Agendar
+        </button>
+      </div>
     `;
 
     lista.appendChild(div);
   });
 }
 
-window.verPerfil = function(userId){
-  window.location.href = `perfil-publico.html?id=${userId}`;
+window.verPerfil = function (userIdEnc) {
+  const userId = decodeURIComponent(userIdEnc || "");
+  if (!userId) return alert("Tutor inválido.");
+  window.location.href = `perfil-publico.html?id=${encodeURIComponent(userId)}`;
+};
+
+window.verNoMapa = function (localIdEnc) {
+  const localId = decodeURIComponent(localIdEnc || "");
+  if (!localId) return alert("Sem local cadastrado nesta aula.");
+  window.location.href = `mapa-view.html?local=${encodeURIComponent(localId)}`;
 };
 
 window.agendarAula = async function (aulaId) {
@@ -168,7 +203,6 @@ window.agendarAula = async function (aulaId) {
     alert(err.message || "Erro ao agendar aula.");
   }
 };
-
 
 // init
 carregarMaterias();

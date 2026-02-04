@@ -31,6 +31,19 @@ export class AulasService {
     private agRepo = new AgendamentoMongoRepository();
     private graph = new UserNeo4jRepository();
 
+    /** garante que localId seja sempre string JSON (pra não quebrar JSON.parse no front) */
+    private normalizeLocalId(value: any): string | undefined {
+        if (value === undefined || value === null) return undefined;
+        if (typeof value === 'string') return value;
+
+        // se chegou como objeto, converte pra string JSON
+        try {
+            return JSON.stringify(value);
+        } catch {
+            return undefined;
+        }
+    }
+
     private async assertTutorValidado(tutorId: string) {
         const tutor = await this.users.findById(tutorId);
         if (!tutor) throw new Error('Usuário não encontrado');
@@ -66,7 +79,10 @@ export class AulasService {
             titulo: String(titulo).trim(),
             descricao: String(descricao).trim(),
             dataHora: dt.toISOString(),
-            localId: data.localId,
+
+            // ✅ garante string JSON
+            localId: this.normalizeLocalId((data as any).localId),
+
             status: 'DISPONIVEL',
             createdAt: new Date()
         };
@@ -83,7 +99,7 @@ export class AulasService {
 
     /**
      * Aulas disponíveis para ALUNO (retorno "limpo" pro front)
-     * Inclui materiaNome e tutorNome.
+     * Inclui materiaNome, tutorNome, dataHora e localId.
      */
     async listAvailable(): Promise<AulaView[]> {
         const aulas = await this.aulas.listAvailable();
@@ -117,8 +133,11 @@ export class AulasService {
                 titulo: a.titulo,
                 descricao: a.descricao,
 
-                dataHora: a.dataHora,
-                localId: a.localId,
+                // garante string ISO
+                dataHora: String(a.dataHora || ''),
+
+                // garante string JSON (mesmo se veio do mongo como objeto)
+                localId: this.normalizeLocalId((a as any).localId),
 
                 status: String(a.status || 'DISPONIVEL'),
                 createdAt: a.createdAt
@@ -129,7 +148,7 @@ export class AulasService {
     async listMine(tutorId: string) {
         const aulas = await this.aulas.listByTutor(tutorId);
 
-        // ===== materiaNome (já tinha) =====
+        // ===== materiaNome =====
         const materiaIds = Array.from(new Set(aulas.map(a => a.materiaId).filter(Boolean)));
         const materias = await this.materias.findByIds(materiaIds);
         const materiaMap = new Map(
@@ -138,7 +157,6 @@ export class AulasService {
 
         // ===== alunos confirmados =====
         const aulaIds = aulas.map(a => String(a._id)).filter(Boolean);
-
         const agsConfirmados = await this.agRepo.findConfirmedByAulaIds(aulaIds);
 
         const alunoIds = Array.from(
@@ -162,13 +180,16 @@ export class AulasService {
             alunosPorAula.set(aulaId, arr);
         }
 
-        // retorno final (compatível com seu front)
+        // retorno final
         return aulas.map(a => {
             const id = String(a._id);
             return {
                 ...a,
+                // garante localId string no retorno pro front
+                localId: this.normalizeLocalId((a as any).localId),
+
                 materiaNome: materiaMap.get(String(a.materiaId)) || a.materiaId,
-                alunosMatriculados: alunosPorAula.get(id) || [] // ✅ só CONFIRMADOS
+                alunosMatriculados: alunosPorAula.get(id) || []
             };
         });
     }
@@ -179,6 +200,11 @@ export class AulasService {
 
         for (const k of allowed) {
             if (patch[k] !== undefined) (clean as any)[k] = patch[k];
+        }
+
+        // ✅ normaliza localId se veio como objeto
+        if ((clean as any).localId !== undefined) {
+            (clean as any).localId = this.normalizeLocalId((clean as any).localId);
         }
 
         if (clean.materiaId) {
@@ -198,23 +224,19 @@ export class AulasService {
 
         const updated = await this.aulas.findById(id);
 
-        // manter Neo4j "coerente" (atualiza o título se mudou)
+        // manter Neo4j coerente (atualiza título se mudou)
         if (updated && clean.titulo) {
-            await this.graph.createAulaNode(updated._id!, updated.titulo); // MERGE + SET titulo
+            await this.graph.createAulaNode(updated._id!, updated.titulo);
         }
 
         return updated;
     }
 
     async remove(id: string, tutorId: string) {
-        //apaga a aula no Mongo
         const ok = await this.aulas.deleteById(id, tutorId);
         if (!ok) throw new Error('Aula não encontrada ou você não tem permissão');
 
-        //apaga todos os agendamentos ligados a essa aula (Mongo)
         await this.agRepo.deleteByAulaId(id);
-
-        //apaga nó/relacionamentos no Neo4j
         await this.graph.deleteAulaNode(id);
 
         return { deleted: true };
