@@ -52,19 +52,24 @@ export class CoordenadorService {
   }
 
   async listAlunos(): Promise<CoordenadorUserView[]> {
-    const alunos = await this.users.findByRole("ALUNO" as any);
-    return (alunos || []).map(u => this.stripUser(u));
+    const all = await this.users.findAll(); // já vem sem senha
+    const alunos = (all || []).filter((u: any) => String(u.role || "").toUpperCase() === "ALUNO");
+    return alunos.map(u => this.stripUser(u));
   }
 
   async listTutores(): Promise<CoordenadorUserView[]> {
-    const tutores = await this.users.findByRole("TUTOR" as any);
-    return (tutores || []).map(u => this.stripUser(u));
+    const all = await this.users.findAll();
+    const tutores = (all || []).filter((u: any) => String(u.role || "").toUpperCase() === "TUTOR");
+    return tutores.map(u => this.stripUser(u));
   }
 
   async listAulas(): Promise<CoordenadorAulaView[]> {
-    const aulasRaw = await this.aulas.listAll();
+    // precisa listar TODAS as aulas (não só DISPONIVEL)
+    const aulasRaw =
+      (typeof (this.aulas as any).listAll === "function")
+        ? await (this.aulas as any).listAll()
+        : await this.aulas.listAvailable();
 
-    // força tipos para string[]
     const tutorIds: string[] = Array.from(
       new Set((aulasRaw || []).map((a: any) => a?.tutorId).filter(Boolean).map((x: any) => String(x)))
     );
