@@ -25,7 +25,7 @@ export function authenticate(
       process.env.JWT_SECRET as string
     ) as JwtPayload;
 
-    req.user = decoded; // vamos tipar isso já já
+    req.user = decoded; 
 
     next();
   } catch {

@@ -14,7 +14,7 @@ import coordenadorRoutes from "./routes/coordenador.routes";
 const app = express();
 
 app.use(cors({
-    origin: true, // libera o origin que está chamando (ok pra projeto acadêmico)
+    origin: true, 
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
