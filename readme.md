@@ -47,7 +47,7 @@ aluno-* | tutor-* | coordenador-* | admin-*
 
 Cada aula possui local com padrão **GeoJSON**, escolhido em mapa interativo:
 
-```json
+json
 {
   "type": "Point",
   "coordinates": [-38.5616, -6.8896]
@@ -64,10 +64,10 @@ Pré-requisitos
 - Neo4j
 
 - Instalar dependências
-npm install
-
+```npm install
+```
 - Configurar .env
-PORT=3000
+```PORT=3000
 
 MONGO_URI=mongodb://localhost:27017/vivaedu
 
@@ -76,10 +76,10 @@ NEO4J_USER=neo4j
 NEO4J_PASSWORD=senha
 
 JWT_SECRET=supersecret
-
+```
 - Rodar backend
-npm run dev
-
+```npm run dev
+```
 ## 👥 Perfis
 
 Aluno: agenda aulas e vê locais.
