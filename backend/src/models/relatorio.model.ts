@@ -8,7 +8,7 @@ export interface Relatorio {
 
   arquivoUrl?: string;     // "/uploads/relatorios/arquivo.pdf"
   arquivoNome?: string;    // "relatorio.pdf"
-  arquivoMime?: string;    // "application/pdf"
+  arquivoMime?: string;   
 
   createdAt: Date;
 }

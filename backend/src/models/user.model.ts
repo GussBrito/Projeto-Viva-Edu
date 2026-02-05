@@ -3,8 +3,8 @@ export type UserRole = 'ALUNO' | 'TUTOR' | 'COORDENADOR' | 'ADMIN';
 export type CursoStatus = 'CURSANDO' | 'CONCLUIDO';
 
 export interface TutorDocs {
-  comprovanteUrl?: string; // nome do arquivo ou URL
-  identidadeUrl?: string;  // nome do arquivo ou URL
+  comprovanteUrl?: string; 
+  identidadeUrl?: string;  
 }
 
 export interface User {
@@ -20,15 +20,15 @@ export interface User {
 
   createdAt?: Date;
 
-  // =========================
-  // CAMPOS ALUNO (opcionais)
-  // =========================
+ 
+  // CAMPOS ALUNO 
+
   idade?: number;
   serie?: string;
 
-  // =========================
-  // CAMPOS TUTOR (opcionais)
-  // =========================
+
+  // CAMPOS TUTOR 
+
   areaAtuacao?: string;
   formacao?: string;
   situacaoCurso?: CursoStatus;
@@ -39,9 +39,4 @@ export interface User {
   // validação do tutor (por coordenador)
   tutorValidado?: boolean;
   tutorValidadoEm?: Date;
-
-  // =========================
-  // CAMPOS COORDENADOR (opcionais)
-  // =========================
-  // unidade?: string;
 }
