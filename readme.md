@@ -64,10 +64,12 @@ Pré-requisitos
 - Neo4j
 
 - Instalar dependências
-```npm install
+```
+npm install
 ```
 - Configurar .env
-```PORT=3000
+```
+PORT=3000
 
 MONGO_URI=mongodb://localhost:27017/vivaedu
 
@@ -78,7 +80,8 @@ NEO4J_PASSWORD=senha
 JWT_SECRET=supersecret
 ```
 - Rodar backend
-```npm run dev
+```
+npm run dev
 ```
 ## 👥 Perfis
 
